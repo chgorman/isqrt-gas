@@ -1,0 +1,116 @@
+\section{Comparison of Gas Costs}
+\label{sec:comparison}
+
+Because all operations are performed within the Ethereum Virtual Machine,
+the primary cost metric is the overall gas cost.
+Thus, the focus is on minimizing the total gas used.
+Ideally, the best algorithm will have the lowest maximum, mean, and median
+gas costs.
+We note that the results here are different from those
+in~\cite{EfficientIsqrt} for three reasons:
+first, some of the algorithms are different
+(and we chose the most recent versions of those found online);
+second, we ensure that all input values are unique
+(there may have been double counting certain evaluations);
+third, different input values were chosen.
+
+\subsection{Data Point Selection}
+
+Any gas cost comparison requires the selection of \texttt{uint256}
+values for input.
+The values were chosen in this way:
+
+\begin{itemize}
+\item all numbers of the form $2^{k}$, $2^{k}-1$, and $2^{k}+1$
+    for nonnegative values of $k$;
+\item $v-1$, $v$, and $v+1$ for $v = (2^{128}-1)^{2}$
+    (these were chosen because of an edge case in the new algorithms);
+\item random values chosen according to the
+    loguniform distribution~\cite{ScipyLoguniform}
+    on $\brackets{1, 2^{256}}$ when the random seed
+    is initialized to $0$~\cite{NumpyRandomSeed}.
+\end{itemize}
+
+\noindent
+The number of random samples were increased until
+there were $2048$ unique values.
+While it is clear that the particular distribution affects to results,
+we believe choosing the input values in this way reduces
+the risk of potential bias.
+There were a total of $768$ deterministic values chosen
+and a total of $1303$ random samples were required to determine
+the remaining 1280 values.
+
+In addition to measuring the gas cost,
+the result of each integer square root operation was
+validated using
+Python's integer square root~\cite{PythonIsqrt,PythonIsqrtLink}.
+There was no instance in which an algorithm ever produced an incorrect result;
+this is, of course, not a proof that 
+\prb{} (Listing~\ref{list:prb-newton}),
+\OpenZeppelin{} (Listing~\ref{list:oz-newton}), and
+\abdk{} (Listing~\ref{list:abdk-newton})
+are correct,
+but rather that there are no known values where these algorithms fail.
+
+\subsection{Summary Statistics}
+
+A listing of the summary statistics describing the runs
+may be found in Tables~\ref{table:gas_costs_1}
+and \ref{table:gas_costs_2}.
+From here, we see that the algorithm with the smallest
+maximum, mean, and median gas costs is \UnrolledThree{}.
+Although the standard deviation of \UnrolledThree{} is not the smallest,
+it is not particularly large.
+We note that standard deviations of
+\Uniswap{}, \WhileOne{}, \WhileTwo{}, and \WhileThree{}
+are larger than the others, and we look at this more closely below.
+
+\subsection{Detailed Analysis}
+
+We now plan to take a closer look at how the gas cost varies
+with the argument.
+Plots of the gas costs may be found in Figures~\ref{fig:gas_plots_1}
+and \ref{fig:gas_plots_2}.
+
+Aside from \Uniswap{}, \WhileOne{}, \WhileTwo{}, and \WhileThree{},
+we see from Figures~\ref{fig:gas_plots_1} and \ref{fig:gas_plots_2}
+that the gas costs are relatively constant across argument.
+In looking at the algorithms, this is not surprising:
+\Uniswap{}, \WhileOne{}, \WhileTwo{}, and \WhileThree{}
+all have \texttt{while} loops.
+In Figure~\ref{fig:gas_plots_2},
+we can also see that small arguments in \While{} algorithms
+have lower gas costs than the corresponding \Unrolled{} algorithms.
+This is not surprising, given that fewer Newton iterations are required,
+and exiting before performing unnecessary operations results in a lower cost.
+
+In order to determine when the \Unrolled{} algorithms outperform
+the \While{} algorithms,
+we determine which algorithms
+have the lowest gas cost for each argument evaluated.
+After looking at the gas costs from each algorithm,
+we counted the number of times each algorithm was minimal;
+the results may be found in Table~\ref{table:minimal_gas_costs}.
+Additionally, we plot the instances where certain algorithms
+were minimal in Figure~\ref{fig:minimal_gas};
+a histogram may be found in Figure~\ref{fig:minimal_gas_hist}.
+There does not appear to be a particular pattern
+in the value distribution.
+The main trend is that
+\UnrolledThree{} (Listing~\ref{list:newton-unrolled-3})
+consistently performs well across the range of arguments.
+The only region where this does not hold is for small arguments,
+where other algorithms (\While{}) performed better;
+this makes sense because fewer Newton iterations are required.
+
+A more extensive analysis may be found in
+Appendix~\ref{app:extended};
+the results are similar.
+
+\input{tables/gas_costs_1.tex}
+\input{tables/gas_costs_2.tex}
+\input{plots/gas_plots.tex}
+\input{tables/minimal_gas.tex}
+\input{plots/minimal_gas_plots.tex}
+\input{plots/minimal_hist_plots.tex}

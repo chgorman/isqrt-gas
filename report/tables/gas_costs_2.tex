@@ -1,0 +1,26 @@
+\begin{table}[t]
+\centering
+\begin{tabular}{|c|
+    |S[table-format=3.0]|S[table-format=3.0]
+    |S[table-format=3.0]|S[table-format=4.0]
+    |S[table-format=4.0]|S[table-format=4.0]|}
+\hline
+    & \UnrolledOne{} & \UnrolledTwo{} &
+    \cellcolor{yellow!25} \UnrolledThree{} &
+    \WhileOne{} & \WhileTwo{} & \WhileThree{} \\
+\hline
+Max    & 858 & 851 & \cellcolor{yellow!25} 831 & 1246 & 1190 & 1177 \\
+Mean   & 776 & 775 & \cellcolor{yellow!25} 749 &  853 &  902 &  870 \\
+Median & 779 & 777 & \cellcolor{yellow!25} 752 &  898 &  932 &  895 \\
+Std    &  42 &  42 & \cellcolor{yellow!25}  41 &  180 &  160 &  141 \\
+\hline
+\end{tabular}
+\caption[Gas Costs Statistics 2]{Here are some statistics
+    related to the gas cost data from Figure~\ref{fig:gas_plots_2}.
+    We recall that all of these algorithms are provably correct.
+    We see that \UnrolledThree{} has the smallest gas costs
+    in terms of maximum, mean, and median.
+    These results are for the tests in Section~\ref{sec:comparison}.
+    }
+\label{table:gas_costs_2}
+\end{table}
