@@ -1,0 +1,143 @@
+\section{Integer Square Root Algorithms}
+
+\subsection{Algorithm Design Principles}
+
+The algorithm design philosophy is straightforward:
+provably correct algorithms which are efficient within the
+Ethereum Virtual Machine
+without any additional storage;
+this includes using no lookup values for initialization.
+It would be interesting to extend the results of~\cite{FormalVerIsqrt}
+(which computes the integer square root of \texttt{uint64}
+and uses table lookups)
+to the \texttt{uint256} setting here.
+
+\subsection{Specific Algorithms in Solidity}
+
+\subsubsection{Algorithms Found Online}
+
+The specific \textsc{Isqrt} algorithms we found online were
+\Uniswap{} (Listing~\ref{list:uni-newton})~\cite{uniswap-v2},
+\prb{} (Listing~\ref{list:prb-newton})~\cite{prb-math},
+\OpenZeppelin{} (Listing~\ref{list:oz-newton})~\cite{open-zeppelin}, and 
+\abdk{} (Listing~\ref{list:abdk-newton})~\cite{abdk-consulting}.
+Two algorithms
+(\prb{} (Listing~\ref{list:prb-newton}) and
+\abdk{} (Listing~\ref{list:abdk-newton}))
+appear to be exactly the same aside from different integer notation
+and ``unchecked'' portions.
+The remaining algorithm
+\OpenZeppelin{} (Listing~\ref{list:oz-newton}) is equivalent
+to \prb{} (Listing~\ref{list:prb-newton}) and
+\abdk{} (Listing~\ref{list:abdk-newton})
+outside of separating the function calls.
+
+None of these algorithms reference a proof of correctness.
+We note that \Uniswap{} (Listing~\ref{list:uni-newton})
+is provably correct as it implements~\cite[Algorithm 1.7.1]{cohen1993}
+(although it doesn't follow the comment
+in~\cite[Chapter 1.7, Remarks]{cohen1993} that
+``[w]hen actually implementing this algorithm,
+the initialization step must be modified'').
+Furthermore,
+\OpenZeppelin{} (Listing~\ref{list:oz-newton})~\cite{open-zeppelin}
+says that we ``need at most 7 iteration[s]''
+while 
+\abdk{} (Listing~\ref{list:abdk-newton})~\cite{abdk-consulting} states that
+``[s]even iterations should be enough'';
+\prb{} (Listing~\ref{list:prb-newton})~\cite{prb-math}
+has similar language.
+
+\input{code/uni-newton.tex}
+\input{code/prb-newton.tex}
+\input{code/oz-newton.tex}
+\input{code/abdk-newton.tex}
+
+\subsubsection{Provably Correct Algorithms}
+
+Due to the requirement of seeking \emph{provably correct}
+algorithms for computing integer square roots,
+additional algorithms were written.
+
+The first provably correct algorithm converts results from~\cite{PythonIsqrt}
+into a Solidity algorithm;
+we denote this as
+\python{} (Listing~\ref{list:python-isqrt}).
+The next algorithms come in two groups of 3:
+one group is based on unrolled Newton iterations,
+and the second group is based on Newton iterations using a \texttt{while} loop.
+They are
+\UnrolledOne{} (Listing~\ref{list:newton-unrolled-1}),
+\UnrolledTwo{} (Listing~\ref{list:newton-unrolled-2}),
+\UnrolledThree{} (Listing~\ref{list:newton-unrolled-3}),
+\WhileOne{} (Listing~\ref{list:newton-while-1}),
+\WhileTwo{} (Listing~\ref{list:newton-while-2}), and
+\WhileThree{} (Listing~\ref{list:newton-while-3}).
+We note that \UnrolledThree{} (Listing~\ref{list:newton-unrolled-3})
+was originally presented in~\cite{EfficientIsqrt}.
+
+Here, \Unrolled{} refers to the fact that the Newton iterations
+are unrolled: a fixed number of iterations is performed;
+\While{} refers to the fact that the Newton iterations are performed
+within a \texttt{while} loop.
+Label 1 refers to the fact that the initialization begins
+at the largest power-of-2 less than or equal to integer square root value;
+Label 2 refers to the fact that the initialization begins
+at the smallest power-of-2 greater than the integer square root value;
+Label 3 refers to the fact that the initialization begins
+at the arithmetic mean of the power-of-2 above and below
+the integer square root value.
+
+We note that in \UnrolledOne{} and \UnrolledTwo{}
+(Listings~\ref{list:newton-unrolled-1} and \ref{list:newton-unrolled-2}),
+7 Newton iterations are performed;
+in \UnrolledThree{} (Listings~\ref{list:newton-unrolled-3}),
+only 6 Newton iterations are performed.
+The results from~\cite{EfficientIsqrt}
+show why the final check in \Unrolled{} ensures a valid result.
+Also, in \WhileOne{} and \WhileThree{}
+(Listings~\ref{list:newton-while-1} and \ref{list:newton-while-3}),
+one Newton iteration is performed
+before entering the \texttt{while} loop
+(this is required for the stopping criterion);
+this is not present in \WhileTwo{} (Listing~\ref{list:newton-while-2}).
+From~\cite[Algorithm 1.7.1]{cohen1993},
+no additional check is needed before returning the result.
+
+\input{code/python_isqrt.tex}
+\input{code/newton_unrolled_1.tex}
+\input{code/newton_unrolled_2.tex}
+\input{code/newton_unrolled_3.tex}
+\input{code/newton_while_1.tex}
+\input{code/newton_while_2.tex}
+\input{code/newton_while_3.tex}
+
+\subsection{General Algorithm Discussion}
+
+When using Newton iterations, it is critical to use
+a good initial approximation to ensure a low overall cost.
+Most of the algorithms use the same initialization value:
+the largest power-of-2 less than or equal to the integer square root.
+These are
+\prb{} (Listing~\ref{list:prb-newton}),
+\OpenZeppelin{} (Listing~\ref{list:oz-newton}),
+\abdk{} (Listing~\ref{list:abdk-newton}),
+\UnrolledOne{} (Listing~\ref{list:newton-unrolled-1}), and
+\WhileOne{} (Listing~\ref{list:newton-while-1}).
+Other good initialization values are 
+\UnrolledTwo{} (Listing~\ref{list:newton-unrolled-2}) and
+\WhileTwo{} (Listing~\ref{list:newton-while-2}) 
+which follow the initialization suggestions of
+\cite[Chapter 1.7, Remarks (2)]{cohen1993} and
+\cite[Algorithm 9.2.11]{PrimeNumbersACP2005})
+as well as
+\UnrolledThree{} (Listing~\ref{list:newton-unrolled-3}) and
+\WhileThree{} (Listing~\ref{list:newton-while-3})
+(the new initialization from \cite{EfficientIsqrt}).
+\Uniswap{} (Listing~\ref{list:uni-newton}) has the worst
+initialization value (the input value itself).
+
+For a better understanding of approximate square roots,
+see~\cite{PythonIsqrt};
+the discussion in~\cite{EfficientIsqrt} on approximate square roots
+is based on~\cite{PythonIsqrt}.

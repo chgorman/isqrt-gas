@@ -1,0 +1,46 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Preamble: New Commands
+
+\numberwithin{equation}{section}
+
+\newcommand*{\norm}[1]{\left\| #1 \right\|}		
+\newcommand*{\angles}[1]{\left\langle #1 \right\rangle}
+\newcommand*{\abs}[1]{\left| #1 \right|}
+\newcommand*{\parens}[1]{\left( #1 \right)}
+\newcommand*{\brackets}[1]{\left[ #1 \right]}	
+\newcommand*{\braces}[1]{\left\{ #1 \right\}}
+\newcommand*{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand*{\floor}[1]{\left\lfloor #1 \right\rfloor}
+
+\newcommand*{\N}[0]{\mathbb{N}}
+
+\newcommand*{\algAssign}[0]{\coloneqq}
+\newcommand*{\mathDef}[0]{\coloneqq}
+\newcommand*{\isqrt}[1]{\textsc{Isqrt}( #1 )}
+
+\newcommand*{\Uniswap}[0]{\texttt{Uni\-swapV2}}
+\newcommand*{\prb}[0]{\texttt{PRB}}
+\newcommand*{\abdk}[0]{\texttt{ABDK}}
+\newcommand*{\OpenZeppelin}[0]{\texttt{Open\-Zep\-pelin}}
+\newcommand*{\python}[0]{\texttt{Python}}
+
+\newcommand*{\UnrolledOne}[0]{\texttt{Unrolled1}}
+\newcommand*{\UnrolledTwo}[0]{\texttt{Unrolled2}}
+\newcommand*{\UnrolledThree}[0]{\texttt{Unrolled3}}
+\newcommand*{\WhileOne}[0]{\texttt{While1}}
+\newcommand*{\WhileTwo}[0]{\texttt{While2}}
+\newcommand*{\WhileThree}[0]{\texttt{While3}}
+
+\newcommand*{\Unrolled}[0]{\texttt{Unrolled}}
+\newcommand*{\While}[0]{\texttt{While}}
+
+% New definition of square root:
+% it renames \sqrt as \oldsqrt
+\let\oldsqrt\sqrt
+% it defines the new \sqrt in terms of the old one
+\def\sqrt{\mathpalette\DHLhksqrt}
+\def\DHLhksqrt#1#2{%
+\setbox0=\hbox{$#1\oldsqrt{#2\,}$}\dimen0=\ht0
+\advance\dimen0-0.2\ht0
+\setbox2=\hbox{\vrule height\ht0 depth -\dimen0}%
+{\box0\lower0.4pt\box2}}
