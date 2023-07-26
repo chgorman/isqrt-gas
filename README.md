@@ -89,10 +89,44 @@ with results stored in `data/extended_rnd/` and may be ran by
 ./analyze_data.sh -r
 ```
 
-### Result
+### Results
 
-This is the most efficient algorithm for computing integer square roots;
+These two tables show the summary statistics from the algorithms tested.
+These are Tables 1 and 2 from the report.
+
+|              | UniswapV2 | PRB | OpenZeppelin | ABDK | Python |
+|  :---------  | --------: | --: | -----------: | ---: | -----: |
+|   Max        |  34205    | 878 |    1021      |  881 |  963   |
+|   Mean       |  17734    | 795 |     950      |  803 |  885   |
+|   Median     |  17639    | 798 |     949      |  803 |  888   |
+|   Std        |   9558    |  34 |      30      |   33 |   44   |
+
+|              | Unrolled1 | Unrolled2 | Unrolled3 | While1 | While2 | While3 |
+|  :---------  | --------: | --------: | --------: | -----: | -----: | -----: |
+|   Max        |    858    |    851    |  **831**  |  1246  |  1190  |  1177  |
+|   Mean       |    776    |    775    |  **749**  |   853  |   902  |   870  |
+|   Median     |    779    |    777    |  **752**  |   898  |   932  |   895  |
+|   Std        |     42    |     42    |   **41**  |   180  |   160  |   141  |
+
+These results show how many times each algorithm was minimal.
+Algorithms not included were never minimal.
+This is Table 3 from the report.
+
+|    Total        |    2048    |
+| :-----------    |  -------:  |
+|    UniswapV2    |       2    |
+|    Python       |       5    |
+|    Unrolled1    |       5    |
+|    Unrolled2    |       5    |
+|  **Unrolled3**  |  **1222**  |
+|    While1       |     386    |
+|    While2       |     156    |
+|    While3       |     297    |
+
+This is the most efficient algorithm (Unrolled3)
+for computing integer square roots;
 it is also provably correct.
+See `report/` for more information.
 
 ```solidity
 // SPDX-License-Identifier: 0BSD
