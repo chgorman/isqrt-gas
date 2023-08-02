@@ -103,10 +103,10 @@ These are Tables 1 and 2 from the report.
 
 |              | Unrolled1 | Unrolled2 | Unrolled3 | While1 | While2 | While3 |
 |  :---------  | --------: | --------: | --------: | -----: | -----: | -----: |
-|   Max        |    858    |    851    |  **831**  |  1246  |  1190  |  1177  |
-|   Mean       |    776    |    775    |  **749**  |   853  |   902  |   870  |
-|   Median     |    779    |    777    |  **752**  |   898  |   932  |   895  |
-|   Std        |     42    |     42    |   **41**  |   180  |   160  |   141  |
+|   Max        |    858    |    851    |  **831**  |  1223  |  1167  |  1154  |
+|   Mean       |    776    |    775    |  **749**  |   831  |   880  |   848  |
+|   Median     |    779    |    777    |  **752**  |   875  |   909  |   878  |
+|   Std        |     42    |     42    |   **41**  |   178  |   158  |   139  |
 
 These results show how many times each algorithm was minimal.
 Algorithms not included were never minimal.
@@ -118,10 +118,10 @@ This is Table 3 from the report.
 |    Python       |       5    |
 |    Unrolled1    |       5    |
 |    Unrolled2    |       5    |
-|  **Unrolled3**  |  **1222**  |
-|    While1       |     386    |
-|    While2       |     156    |
-|    While3       |     297    |
+|  **Unrolled3**  |  **1186**  |
+|    While1       |     383    |
+|    While2       |     189    |
+|    While3       |     294    |
 
 This is the most efficient algorithm (Unrolled3)
 for computing integer square roots;

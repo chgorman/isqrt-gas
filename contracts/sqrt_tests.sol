@@ -333,9 +333,6 @@ contract SqrtTests {
             if (x <= 1) {
                 return x;
             }
-            if (x >= ((1 << 128) - 1)**2) {
-                return (1 << 128) - 1;
-            }
             uint256 xAux = x;
             uint256 result = 1;
             if (xAux >= (1 << 128)) {
@@ -385,9 +382,6 @@ contract SqrtTests {
             if (x <= 1) {
                 return x;
             }
-            if (x >= ((1 << 128) - 1)**2) {
-                return (1 << 128) - 1;
-            }
             uint256 xAux = x;
             uint256 result = 2;
             if (xAux >= (1 << 128)) {
@@ -434,9 +428,6 @@ contract SqrtTests {
         unchecked {
             if (x <= 1) {
                 return x;
-            }
-            if (x >= ((1 << 128) - 1)**2) {
-                return (1 << 128) - 1;
             }
             uint256 xAux = x;
             uint256 result = 1;
