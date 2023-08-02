@@ -112,8 +112,6 @@ done
 # Compute detailed analysis of minimal gas
 $ANALYSIS_FILE $DATA_DIR/output_*.csv
 
-# Will need another sett
-
 # move files
 #cp minimal_plot_*.pdf report/plots/
 mv minimal_plot_*.pdf $DATA_DIR
