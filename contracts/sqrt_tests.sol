@@ -29,6 +29,18 @@ contract SqrtTests {
             sqrt10call(x);
         } else if (index == 11) {
             sqrt11call(x);
+        } else if (index == 12) {
+            sqrt12call(x);
+        } else if (index == 13) {
+            sqrt13call(x);
+        } else if (index == 14) {
+            sqrt14call(x);
+        } else if (index == 15) {
+            sqrt15call(x);
+        } else if (index == 16) {
+            sqrt16call(x);
+        } else if (index == 17) {
+            sqrt17call(x);
         } else {
             revert("Invalid index");
         }
@@ -100,6 +112,42 @@ contract SqrtTests {
         console.log("%s, %s, %s", x, g - gasleft(), y);
     }
 
+    function sqrt12call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = sqrt_newton_linear(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function sqrt13call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = sqrt_newton_bitlength(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function sqrt14call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = sqrt_newton_hyper_4(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function sqrt15call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = sqrt_newton_lookup_4(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function sqrt16call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = sqrt_newton_lookup_8(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function sqrt17call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = sqrt_newton_unrolled_3_v2(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
     ////////////////////////////////////////////////////////////////////////
     function sqrt_python(uint256 x) internal pure returns (uint256) {
         unchecked {
@@ -116,7 +164,7 @@ contract SqrtTests {
             uint256 result = x;
             if (result >= (1 << 128)) {
                 result >>= 128;
-                e += 128;
+                e = 129;
             }
             if (result >= (1 << 64)) {
                 result >>= 64;
@@ -179,7 +227,7 @@ contract SqrtTests {
             uint256 result = 1;
             if (xAux >= (1 << 128)) {
                 xAux >>= 128;
-                result <<= 64;
+                result = 1 << 64;
             }
             if (xAux >= (1 << 64)) {
                 xAux >>= 64;
@@ -232,7 +280,7 @@ contract SqrtTests {
             uint256 result = 2;
             if (xAux >= (1 << 128)) {
                 xAux >>= 128;
-                result <<= 64;
+                result = 1 << 64;
             }
             if (xAux >= (1 << 64)) {
                 xAux >>= 64;
@@ -286,7 +334,7 @@ contract SqrtTests {
             uint256 result = 1;
             if (xAux >= (1 << 128)) {
                 xAux >>= 128;
-                result <<= 64;
+                result = 1 << 64;
             }
             if (xAux >= (1 << 64)) {
                 xAux >>= 64;
@@ -311,7 +359,67 @@ contract SqrtTests {
             if (xAux >= (1 << 2)) {
                 result <<= 1;
             }
-            result += (result >> 1);
+            result = (3*result) >> 1;
+
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            if (result * result <= x) {
+                return result;
+            }
+            return result-1;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Original idea but different implementation
+    function sqrt_newton_unrolled_3_v2(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            if (x <= 1) {
+                return x;
+            }
+            if (x >= ((1 << 128) - 1)**2) {
+                return (1 << 128) - 1;
+            }
+
+            // Here, e represents the (approximate) bit length;
+            // its value is at most 256, so it could fit in a uint16.
+            uint256 e = 1;
+            // Here, result is a copy of x to compute the bit length
+            uint256 result = x;
+            if (result >= (1 << 128)) {
+                result >>= 128;
+                e = 129;
+            }
+            if (result >= (1 << 64)) {
+                result >>= 64;
+                e += 64;
+            }
+            if (result >= (1 << 32)) {
+                result >>= 32;
+                e += 32;
+            }
+            if (result >= (1 << 16)) {
+                result >>= 16;
+                e += 16;
+            }
+            if (result >= (1 << 8)) {
+                result >>= 8;
+                e += 8;
+            }
+            if (result >= (1 << 4)) {
+                result >>= 4;
+                e += 4;
+            }
+            if (result >= (1 << 2)) {
+                e += 2;
+            }
+
+            result = (3 << (e/2)) >> 1;
+
             result = (result + x / result) >> 1;
             result = (result + x / result) >> 1;
             result = (result + x / result) >> 1;
@@ -337,7 +445,7 @@ contract SqrtTests {
             uint256 result = 1;
             if (xAux >= (1 << 128)) {
                 xAux >>= 128;
-                result <<= 64;
+                result = 1 << 64;
             }
             if (xAux >= (1 << 64)) {
                 xAux >>= 64;
@@ -363,8 +471,7 @@ contract SqrtTests {
                 result <<= 1;
             }
 
-            xAux = (result + x / result) >> 1;
-            result = xAux;
+            result = (result + x / result) >> 1;
             xAux = (result + x / result) >> 1;
             while (xAux < result) {
                 result = xAux;
@@ -386,7 +493,7 @@ contract SqrtTests {
             uint256 result = 2;
             if (xAux >= (1 << 128)) {
                 xAux >>= 128;
-                result <<= 64;
+                result = 2 << 64;
             }
             if (xAux >= (1 << 64)) {
                 xAux >>= 64;
@@ -433,7 +540,7 @@ contract SqrtTests {
             uint256 result = 1;
             if (xAux >= (1 << 128)) {
                 xAux >>= 128;
-                result <<= 64;
+                result = 1 << 64;
             }
             if (xAux >= (1 << 64)) {
                 xAux >>= 64;
@@ -458,16 +565,1009 @@ contract SqrtTests {
             if (xAux >= (1 << 2)) {
                 result <<= 1;
             }
-            result += (result >> 1);
+            result = (3 * result) >> 1;
 
-            xAux = (result + x / result) >> 1;
-            result = xAux;
+            result = (result + x / result) >> 1;
             xAux = (result + x / result) >> 1;
             while (xAux < result) {
                 result = xAux;
                 xAux = (result + x / result) >> 1;
             }
             return result;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Use full info from bit length
+    function sqrt_newton_bitlength(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            if (x <= 1) {
+                return x;
+            }
+            if (x >= ((1 << 128) - 1)**2) {
+                return (1 << 128) - 1;
+            }
+
+            // Here, e represents the (approximate) bit length;
+            // its value is at most 256, so it could fit in a uint16.
+            uint256 e = 1;
+            // Here, result is a copy of x to compute the bit length
+            uint256 result = x;
+            if (result >= (1 << 128)) {
+                result >>= 128;
+                e = 129;
+            }
+            if (result >= (1 << 64)) {
+                result >>= 64;
+                e += 64;
+            }
+            if (result >= (1 << 32)) {
+                result >>= 32;
+                e += 32;
+            }
+            if (result >= (1 << 16)) {
+                result >>= 16;
+                e += 16;
+            }
+            if (result >= (1 << 8)) {
+                result >>= 8;
+                e += 8;
+            }
+            if (result >= (1 << 4)) {
+                result >>= 4;
+                e += 4;
+            }
+            if (result >= (1 << 2)) {
+                result >>= 2;
+                e += 2;
+            }
+            // Suppose
+            //
+            //      2^(2k-2) <= x < 2^(2k)
+            //
+            // At this point, e == 2k-1.
+            // This means that
+            //
+            //      1 << (e/2) ==  2**(k-1)
+            if (result >= (1 << 1)) {
+                // normally would include
+                //
+                //      e += 1
+                //
+                // so we should really have e == 2k, so bitlength is even.
+                result = (27 << (e/2)) >> 4;
+            } else {
+                // We actually have
+                //
+                //      e == 2k-1
+                //
+                // so bitlength is odd.
+                result = (39 << (e/2)) >> 5;
+            }
+
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            if (result * result <= x) {
+                return result;
+            }
+            return result-1;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Use linear approximation
+    function sqrt_newton_linear(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            if (x <= 1) {
+                return x;
+            }
+            if (x >= ((1 << 128) - 1)**2) {
+                return (1 << 128) - 1;
+            }
+
+            // Here, e represents the bit length;
+            // its value is at most 256, so it could fit in a uint16.
+            uint256 e = 1;
+            // Here, result is a copy of x to compute the bit length
+            uint256 result = x;
+            if (result >= (1 << 128)) {
+                result >>= 128;
+                e = 129;
+            }
+            if (result >= (1 << 64)) {
+                result >>= 64;
+                e += 64;
+            }
+            if (result >= (1 << 32)) {
+                result >>= 32;
+                e += 32;
+            }
+            if (result >= (1 << 16)) {
+                result >>= 16;
+                e += 16;
+            }
+            if (result >= (1 << 8)) {
+                result >>= 8;
+                e += 8;
+            }
+            if (result >= (1 << 4)) {
+                result >>= 4;
+                e += 4;
+            }
+            if (result >= (1 << 2)) {
+                e += 2;
+            }
+            // e is currently bit length; we overwrite it to scale x
+            e = (256 - e) >> 1;
+            // m now satisfies 2**254 <= m < 2**256
+            uint256 m = x << (2 * e);
+            // result now stores the result
+
+            // need to initialize result
+            result = m >> 252;
+            result = (14 + result) << 123;
+
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result >>= e;
+
+            if (result * result <= x) {
+                return result;
+            }
+            return result-1;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // New design
+    // Uses hyperbolic approximation to get 4 bits of precision
+    function sqrt_newton_hyper_4(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            if (x <= 1) {
+                return x;
+            }
+            if (x >= ((1 << 128) - 1)**2) {
+                return (1 << 128) - 1;
+            }
+
+            // Here, e represents the bit length;
+            // its value is at most 256, so it could fit in a uint16.
+            uint256 e = 1;
+            // Here, result is a copy of x to compute the bit length
+            uint256 result = x;
+            if (result >= (1 << 128)) {
+                result >>= 128;
+                e = 129;
+            }
+            if (result >= (1 << 64)) {
+                result >>= 64;
+                e += 64;
+            }
+            if (result >= (1 << 32)) {
+                result >>= 32;
+                e += 32;
+            }
+            if (result >= (1 << 16)) {
+                result >>= 16;
+                e += 16;
+            }
+            if (result >= (1 << 8)) {
+                result >>= 8;
+                e += 8;
+            }
+            if (result >= (1 << 4)) {
+                result >>= 4;
+                e += 4;
+            }
+            if (result >= (1 << 2)) {
+                e += 2;
+            }
+            // e is currently bit length; we overwrite it to scale x
+            e = (256 - e) >> 1;
+            // m now satisfies 2**254 <= m < 2**256
+            uint256 m = x << (2 * e);
+            // result now stores the result
+
+            // need to initialize result
+            result = m >> 252;
+            result = (512/(31 - result)) << 123;
+
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result >>= e;
+
+            if (result * result <= x) {
+                return result;
+            }
+            return result-1;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // New design
+    // Uses table lookups for 4 bits of precision
+    // First 4 bytes are zero bytes
+    bytes constant lookup_table_4 = "\x00\x00\x00\x00\x11\x13\x15\x16\x17\x19\x1a\x1b\x1c\x1d\x1e\x1f";
+
+    function sqrt_newton_lookup_4(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            if (x <= 1) {
+                return x;
+            }
+            if (x >= ((1 << 128) - 1)**2) {
+                return (1 << 128) - 1;
+            }
+
+            // Here, e represents the bit length;
+            // its value is at most 256, so it could fit in a uint16.
+            uint256 e = 1;
+            // Here, result is a copy of x to compute the bit length
+            uint256 result = x;
+            if (result >= (1 << 128)) {
+                result >>= 128;
+                e = 129;
+            }
+            if (result >= (1 << 64)) {
+                result >>= 64;
+                e += 64;
+            }
+            if (result >= (1 << 32)) {
+                result >>= 32;
+                e += 32;
+            }
+            if (result >= (1 << 16)) {
+                result >>= 16;
+                e += 16;
+            }
+            if (result >= (1 << 8)) {
+                result >>= 8;
+                e += 8;
+            }
+            if (result >= (1 << 4)) {
+                result >>= 4;
+                e += 4;
+            }
+            if (result >= (1 << 2)) {
+                e += 2;
+            }
+            // e is currently bit length; we overwrite it to scale x
+            e = (256 - e) >> 1;
+            // m now satisfies 2**254 <= m < 2**256
+            uint256 m = x << (2 * e);
+            // result now stores the result
+
+            // need to initialize result
+            result = uint256(uint8(lookup_table_4[(m >> 252)])) << 123;
+
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result >>= e;
+
+            if (result * result <= x) {
+                return result;
+            }
+            return result-1;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // New design
+    // Uses table lookups for 8 bits of precision
+    // First 64 bytes are zero bytes
+    bytes constant lookup_table_8 = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x03\x05\x07\x09\x0b\x0d\x0f\x11\x13\x15\x16\x18\x1a\x1c\x1e\x1f\x21\x23\x25\x27\x28\x2a\x2c\x2d\x2f\x31\x32\x34\x36\x37\x39\x3b\x3c\x3e\x3f\x41\x43\x44\x46\x47\x49\x4b\x4c\x4e\x4f\x51\x52\x54\x55\x57\x58\x5a\x5b\x5d\x5e\x5f\x61\x62\x64\x65\x67\x68\x6a\x6b\x6c\x6e\x6f\x71\x72\x73\x75\x76\x77\x79\x7a\x7b\x7d\x7e\x7f\x81\x82\x83\x85\x86\x87\x89\x8a\x8b\x8d\x8e\x8f\x90\x92\x93\x94\x96\x97\x98\x99\x9b\x9c\x9d\x9e\x9f\xa1\xa2\xa3\xa4\xa6\xa7\xa8\xa9\xaa\xac\xad\xae\xaf\xb0\xb2\xb3\xb4\xb5\xb6\xb7\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff";
+
+    function sqrt_newton_lookup_8(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            if (x <= 1) {
+                return x;
+            }
+            if (x >= ((1 << 128) - 1)**2) {
+                return (1 << 128) - 1;
+            }
+
+            // Here, e represents the bit length;
+            // its value is at most 256, so it could fit in a uint16.
+            uint256 e = 1;
+            // Here, result is a copy of x to compute the bit length
+            uint256 result = x;
+            if (result >= (1 << 128)) {
+                result >>= 128;
+                e = 129;
+            }
+            if (result >= (1 << 64)) {
+                result >>= 64;
+                e += 64;
+            }
+            if (result >= (1 << 32)) {
+                result >>= 32;
+                e += 32;
+            }
+            if (result >= (1 << 16)) {
+                result >>= 16;
+                e += 16;
+            }
+            if (result >= (1 << 8)) {
+                result >>= 8;
+                e += 8;
+            }
+            if (result >= (1 << 4)) {
+                result >>= 4;
+                e += 4;
+            }
+            if (result >= (1 << 2)) {
+                e += 2;
+            }
+            // e is currently bit length; we overwrite it to scale x
+            e = (256 - e) >> 1;
+            // m now satisfies 2**254 <= m < 2**256
+            uint256 m = x << (2 * e);
+            // result now stores the result
+
+            // need to initialize result
+            result = 2**127 + (uint256(uint8(lookup_table_8[(m >> 248)])) << 119);
+
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result = (result + m / result) >> 1;
+            result >>= e;
+
+            if (result * result <= x) {
+                return result;
+            }
+            return result-1;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Gas tests for initialization
+    function initcall(uint256 x, uint256 index) public view {
+        if (index == 1) {
+            init1call(x);
+        } else if (index == 2) {
+            init2call(x);
+        } else if (index == 3) {
+            init3call(x);
+        } else if (index == 4) {
+            init4call(x);
+        } else {
+            revert("Invalid index");
+        }
+    }
+
+    function init1call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = init_1(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function init2call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = init_2(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function init3call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = init_3(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function init4call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = init_4(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function init_1(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            return result;
+        }
+    }
+
+    function init_2(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 e = 1;
+            uint256 result = x;
+            if (result >= (1 << 128)) {
+                result >>= 128;
+                e += 128;
+            }
+            if (result >= (1 << 64)) {
+                result >>= 64;
+                e += 64;
+            }
+            if (result >= (1 << 32)) {
+                result >>= 32;
+                e += 32;
+            }
+            if (result >= (1 << 16)) {
+                result >>= 16;
+                e += 16;
+            }
+            if (result >= (1 << 8)) {
+                result >>= 8;
+                e += 8;
+            }
+            if (result >= (1 << 4)) {
+                result >>= 4;
+                e += 4;
+            }
+            if (result >= (1 << 2)) {
+                result >>= 2;
+                e += 2;
+            }
+            if (result >= (1 << 1)) {
+                e += 1;
+            }
+            result = 1 << ((e-1)/2);
+            return result;
+        }
+    }
+
+    function init_3(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 e = 1;
+            uint256 result = x;
+            if (result >= (1 << 128)) {
+                result >>= 128;
+                e += 128;
+            }
+            if (result >= (1 << 64)) {
+                result >>= 64;
+                e += 64;
+            }
+            if (result >= (1 << 32)) {
+                result >>= 32;
+                e += 32;
+            }
+            if (result >= (1 << 16)) {
+                result >>= 16;
+                e += 16;
+            }
+            if (result >= (1 << 8)) {
+                result >>= 8;
+                e += 8;
+            }
+            if (result >= (1 << 4)) {
+                result >>= 4;
+                e += 4;
+            }
+            if (result >= (1 << 2)) {
+                e += 2;
+            }
+            result = 1 << (e/2);
+            return result;
+        }
+    }
+
+    function init_4(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 e = 0;
+            uint256 result = x;
+            if (result >= (1 << 128)) {
+                result >>= 128;
+                e += 64;
+            }
+            if (result >= (1 << 64)) {
+                result >>= 64;
+                e += 32;
+            }
+            if (result >= (1 << 32)) {
+                result >>= 32;
+                e += 16;
+            }
+            if (result >= (1 << 16)) {
+                result >>= 16;
+                e += 8;
+            }
+            if (result >= (1 << 8)) {
+                result >>= 8;
+                e += 4;
+            }
+            if (result >= (1 << 4)) {
+                result >>= 4;
+                e += 2;
+            }
+            if (result >= (1 << 2)) {
+                e += 1;
+            }
+            result = 1 << e;
+            return result;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Gas tests for unrolled Newton iterations;
+    // each additional unrolled iteration costs 48 gas (90 for while)
+    function newtoncall(uint256 x, uint256 index) public view {
+        if (index == 1) {
+            newton1call(x);
+        } else if (index == 2) {
+            newton2call(x);
+        } else if (index == 3) {
+            newton3call(x);
+        } else if (index == 4) {
+            newton4call(x);
+        } else if (index == 5) {
+            newton5call(x);
+        } else if (index == 6) {
+            newton6call(x);
+        } else if (index == 7) {
+            newton7call(x);
+        } else {
+            revert("Invalid index");
+        }
+        console.log();
+    }
+
+    function newton1call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = newton_1(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function newton2call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = newton_2(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function newton3call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = newton_3(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function newton4call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = newton_4(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function newton5call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = newton_5(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function newton6call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = newton_6(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function newton7call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = newton_7(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function newton_1(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            result = (result + x / result) >> 1;
+            return result;
+        }
+    }
+
+    function newton_2(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            return result;
+        }
+    }
+
+    function newton_3(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            return result;
+        }
+    }
+
+    function newton_4(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            return result;
+        }
+    }
+
+    function newton_5(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            return result;
+        }
+    }
+
+    function newton_6(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            return result;
+        }
+    }
+
+    function newton_7(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            return result;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Gas tests for unrolled final check;
+    // each additional unrolled iteration costs 48 gas (90 for while)
+    function returncall(uint256 x, uint256 index) public view {
+        if (index == 1) {
+            return1call(x);
+        } else if (index == 2) {
+            return2call(x);
+        } else {
+            revert("Invalid index");
+        }
+        console.log();
+    }
+
+    function return1call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = return_1(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function return2call(uint256 x) internal view {
+        uint256 g = gasleft();
+        uint256 y = return_2(x);
+        console.log("%s, %s, %s", x, g - gasleft(), y);
+    }
+
+    function return_1(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            return result;
+        }
+    }
+
+    function return_2(uint256 x) internal pure returns (uint256) {
+        unchecked {
+            uint256 xAux = x;
+            uint256 result = 1;
+            if (xAux >= (1 << 128)) {
+                xAux >>= 128;
+                result = 1 << 64;
+            }
+            if (xAux >= (1 << 64)) {
+                xAux >>= 64;
+                result <<= 32;
+            }
+            if (xAux >= (1 << 32)) {
+                xAux >>= 32;
+                result <<= 16;
+            }
+            if (xAux >= (1 << 16)) {
+                xAux >>= 16;
+                result <<= 8;
+            }
+            if (xAux >= (1 << 8)) {
+                xAux >>= 8;
+                result <<= 4;
+            }
+            if (xAux >= (1 << 4)) {
+                xAux >>= 4;
+                result <<= 2;
+            }
+            if (xAux >= (1 << 2)) {
+                result <<= 1;
+            }
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            result = (result + x / result) >> 1;
+            if (result * result <= x) {
+                return result;
+            }
+            return result-1;
         }
     }
 

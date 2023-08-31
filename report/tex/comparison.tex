@@ -9,9 +9,9 @@ gas costs.
 We note that the results here are different from those
 in~\cite{EfficientIsqrt} for three reasons:
 first, some of the algorithms are different
-(and we chose the most recent versions of those found online);
+(and we chose the most recent version of those found online);
 second, we ensure that all input values are unique
-(there may have been double counting certain evaluations);
+(certain values may have been double counted);
 third, different input values were chosen.
 
 \subsection{Data Point Selection}
@@ -34,11 +34,11 @@ The values were chosen in this way:
 \noindent
 The number of random samples were increased until
 there were $2048$ unique values.
-While it is clear that the particular distribution affects to results,
+While it is clear that the particular distribution affects the results,
 we believe choosing the input values in this way reduces
-the risk of potential bias.
+the risk of bias.
 There were a total of $768$ deterministic values chosen
-and a total of $1303$ random samples were required to determine
+and a total of $1303$ random samples determined
 the remaining 1280 values.
 
 In addition to measuring the gas cost,
@@ -47,70 +47,49 @@ validated using
 Python's integer square root~\cite{PythonIsqrt,PythonIsqrtLink}.
 There was no instance in which an algorithm ever produced an incorrect result;
 this is, of course, not a proof that 
-\prb{} (Listing~\ref{list:prb-newton}),
-\OpenZeppelin{} (Listing~\ref{list:oz-newton}), and
-\abdk{} (Listing~\ref{list:abdk-newton})
-are correct,
+\prb{}, \OpenZeppelin{}, and \abdk{} are correct,
 but rather that there are no known values where these algorithms fail.
 
 \subsection{Summary Statistics}
 
+\input{tables/gas_costs_1.tex}
+\input{tables/gas_costs_2.tex}
+\input{tables/gas_costs_3.tex}
+
 A listing of the summary statistics describing the runs
-may be found in Tables~\ref{table:gas_costs_1}
-and \ref{table:gas_costs_2}.
+may be found in Tables~\ref{table:gas_costs_1},
+\ref{table:gas_costs_2}, and \ref{table:gas_costs_3}.
 From here, we see that the algorithm with the smallest
-maximum, mean, and median gas costs is \UnrolledThree{}.
-Although the standard deviation of \UnrolledThree{} is not the smallest,
-it is not particularly large.
-We note that standard deviations of
-\Uniswap{}, \WhileOne{}, \WhileTwo{}, and \WhileThree{}
-are larger than the others, and we look at this more closely below.
+maximum gas cost is \Linear{} while
+the smallest mean and median gas costs is \UnrolledThree{}.
+The standard deviations of \Linear{} and \UnrolledThree{} are reasonable.
 
 \subsection{Detailed Analysis}
 
-We now plan to take a closer look at how the gas cost varies
+We now take a closer look at how the gas cost varies
 with the argument.
-Plots of the gas costs may be found in Figures~\ref{fig:gas_plots_1}
-and \ref{fig:gas_plots_2}.
 
-Aside from \Uniswap{}, \WhileOne{}, \WhileTwo{}, and \WhileThree{},
-we see from Figures~\ref{fig:gas_plots_1} and \ref{fig:gas_plots_2}
-that the gas costs are relatively constant across argument.
-In looking at the algorithms, this is not surprising:
-\Uniswap{}, \WhileOne{}, \WhileTwo{}, and \WhileThree{}
-all have \texttt{while} loops.
-In Figure~\ref{fig:gas_plots_2},
-we can also see that small arguments in \While{} algorithms
-have lower gas costs than the corresponding \Unrolled{} algorithms.
-This is not surprising, given that fewer Newton iterations are required,
-and exiting before performing unnecessary operations results in a lower cost.
-
-In order to determine when the \Unrolled{} algorithms outperform
-the \While{} algorithms,
-we determine which algorithms
-have the lowest gas cost for each argument evaluated.
-After looking at the gas costs from each algorithm,
-we counted the number of times each algorithm was minimal;
+For each value we tested,
+we determined the minimal gas cost
+and then counted the number of times each algorithm was minimal;
 the results may be found in Table~\ref{table:minimal_gas_costs}.
-Additionally, we plot the instances where certain algorithms
-were minimal in Figure~\ref{fig:minimal_gas};
-a histogram may be found in Figure~\ref{fig:minimal_gas_hist}.
+Additionally, we show a histogram where certain algorithms
+were minimal in Figure~\ref{fig:minimal_gas_hist}.
 There does not appear to be a particular pattern
 in the value distribution.
-The main trend is that
-\UnrolledThree{} (Listing~\ref{list:newton-unrolled-3})
-consistently performs well across the range of arguments.
+The main trend is that \UnrolledThree{}
+consistently performs well across the range of arguments;
+\Linear{} performs well, too.
 The only region where this does not hold is for small arguments,
-where other algorithms (\While{}) performed better;
-this makes sense because fewer Newton iterations are required.
+where other algorithms (\while{}) performed better;
+this makes sense because those values require fewer Newton iterations.
 
+Overall, \UnrolledThree{} has the lowest overall cost
+for a plurality of points (and close to lowest gas cost),
+so we declare this to be the algorithm of choice.
 A more extensive analysis may be found in
 Appendix~\ref{app:extended};
 the results are similar.
 
-\input{tables/gas_costs_1.tex}
-\input{tables/gas_costs_2.tex}
-\input{plots/gas_plots.tex}
 \input{tables/minimal_gas.tex}
-\input{plots/minimal_gas_plots.tex}
 \input{plots/minimal_hist_plots.tex}

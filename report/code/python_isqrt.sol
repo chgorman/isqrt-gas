@@ -9,7 +9,7 @@ function sqrt(uint256 x) internal pure returns (uint256) {
 
         // Here, result is a copy of x to compute the bit length
         uint256 result = x;
-        if (result >= (1 << 128)) { result >>= 128; e += 128; }
+        if (result >= (1 << 128)) { result >>= 128; e = 129; }
         if (result >= (1 <<  64)) { result >>=  64; e +=  64; }
         if (result >= (1 <<  32)) { result >>=  32; e +=  32; }
         if (result >= (1 <<  16)) { result >>=  16; e +=  16; }

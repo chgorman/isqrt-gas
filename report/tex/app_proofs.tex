@@ -1,0 +1,1276 @@
+\section{Proofs}
+\label{app:proofs}
+
+Here we include proofs for the algorithms.
+This includes some of the material from~\cite[Appendix B]{EfficientIsqrt}.
+A notable omission is the proof of
+\python{} (Listing~\ref{list:python-isqrt});
+this is due to the fact that the emphasis here is on algorithms
+based on Newton iteration.
+A proof of correctness for \python{}
+may be found in~\cite[Appendix C]{EfficientIsqrt}.
+Some of the work here will be similar to that found
+in~\cite[Appendix A]{EfficientIsqrt}
+but is included for this document to be self-contained.
+
+\subsection{Mathematical Review}
+
+\subsubsection{Newton Iteration over the Real Numbers}
+
+Fix $\alpha>0$.
+For any $t>0$, we define
+
+\begin{equation}
+    f_{\alpha}(t) \mathDef{} \frac{1}{2}\parens{t + \frac{\alpha}{t}}.
+\end{equation}
+
+\noindent
+We always have
+
+\begin{equation}
+    f_{\alpha}(t) = \frac{1}{2}\parens{t + \frac{\alpha}{t}} \ge \sqrt{\alpha}.
+\end{equation}
+
+\noindent
+This follows from the inequality of the arithmetic and geometric means
+(AM-GM inequality); one reference is~\cite{CSMaster}.
+Given $t>0$, we can look at the sequence $\braces{t_{k}}_{k=0}^{\infty}$
+defined by
+
+\begin{equation}
+    t_{k} = \begin{cases}
+        t \quad &k=0 \\
+        f_{\alpha}(t_{k-1}) \quad &k>0 \\
+    \end{cases}.
+    \label{eq:app:proof:newton_seq}
+\end{equation}
+
+\noindent
+Each application of $f_{\alpha}(\cdot)$ is called a \emph{Newton iteration}.
+This sequence converges to $\sqrt{\alpha}$:
+$\lim_{k\to\infty} t_{k} = \sqrt{\alpha}$.
+
+In order to see how the error changes with each iteration,
+we set
+
+\begin{equation}
+    \eps \mathDef{} t - \sqrt{\alpha}.
+\end{equation}
+
+\noindent
+From here, we find
+
+\begin{equation}
+    f_{\alpha}(t) - \sqrt{\alpha} = \frac{\eps^{2}}{2t}.
+    \label{eq:app:error_equality}
+\end{equation}
+
+\noindent
+The ``$\eps^{2}$'' in the error term shows what we mean
+when we say the algorithm has quadratic convergence.
+
+We make another important observation:
+when $t\ge\sqrt{\alpha}$, we have
+
+\begin{align}
+    f_{\alpha}(t) - \sqrt{\alpha} &= \frac{\eps^{2}}{2t} \nonumber\\
+        &\le \frac{\eps^{2}}{2\sqrt{\alpha}}.
+    \label{eq:app:error_inequality}
+\end{align}
+
+\noindent
+This fact allows us to simplify the error bounds we compute.
+We note that all values of the sequence
+in Eq.~\eqref{eq:app:proof:newton_seq}
+satisfy $t_{k}\ge\sqrt{\alpha}$
+with the possible exception is $t_{0}$.
+
+\subsubsection{Newton Iteration over the Integers}
+
+The fact that we care about \emph{integer operations} within
+the Ethereum Virtual Machine means we focus on a slightly different function.
+Fix $n\in\N$ and let $x\in\N$.
+We define
+
+\begin{equation}
+    g_{n}(x) \mathDef{} \floor{\frac{1}{2}\parens{x + \frac{n}{x}}}.
+\end{equation}
+
+\noindent
+This represents the integer version of $f_{\alpha}$.
+
+
+\subsection{Error Bounds}
+
+Based on the above work, we will now compute the error bounds
+for a number of algorithms.
+The computations are similar,
+and we primarily focus on the initial error and the first Newton iteration,
+as these are most important.
+Only when greater care is required to prove the desired
+error bounds do we go into greater detail.
+
+Throughout this section, we are assuming that $\sqrt{n}$ is an $e$-bit number:
+
+\begin{equation}
+    2^{e-1}\le \sqrt{n} < 2^{e}.
+\end{equation}
+
+\noindent
+This allows us to state the initialization value;
+different initialization \emph{algorithms} may arrive at the same
+initialization \emph{value}.
+
+Throughout, we will specify the initialization $x_{0}$
+and then look at
+
+\begin{equation}
+    x_{k} = g_{n}(x_{k-1}), \quad k>0.
+\end{equation}
+
+\noindent
+We are interested in the values
+
+\begin{equation}
+    \eps_{k} \mathDef{} x_{k} - \sqrt{n}.
+\end{equation}
+
+\noindent
+These values will allow us to determine when $x_{k}$ has reached
+$\textsc{Isqrt}(n)$.
+
+Technically, we care about these error values:
+
+\begin{equation}
+    \hat{\eps}_{k} \mathDef{} x_{k} - \floor{\sqrt{n}}.
+\end{equation}
+
+\noindent
+This is because we are computing \emph{integer square roots},
+not square roots.
+At the same time, we note that when $\eps_{k}\le1$,
+
+\begin{equation}
+    x_{k}\in\braces{q, q+1}, \quad q=\floor{\sqrt{n}}.
+\end{equation}
+
+\noindent
+This follows because $x_{k}\in\N$ and $\abs{\sqrt{n} - \floor{\sqrt{n}}} < 1$.
+Thus, we focus on determining when $\eps_{k}\le1$.
+Any attempt to get a smaller error bound
+is pointless because it is less expensive to check
+if $x_{k}$ satisfies $x_{k}^{2} \le n$.
+
+In each error bound calculation, we will assume that $x_{k} > \sqrt{n}$;
+if this ever fails, we know that $x_{k} = \floor{\sqrt{n}}$.
+
+
+\subsubsection{\UnrolledOne{}}
+\label{app:error_bounds:unrolled1}
+
+The initialization value is chosen to be the largest power-of-two
+less than or equal to $\sqrt{n}$:
+
+\begin{equation}
+    x_{0} = 2^{e-1}.
+\end{equation}
+
+\noindent
+We have the error bound
+
+\begin{equation}
+    \abs{\eps_{0}} \le 2^{e-1}.
+\end{equation}
+
+\noindent
+We now use this to bound $\eps_{1}$:
+
+\begin{align}
+    \eps_{1} &= \frac{\eps_{0}^{2}}{2x_{0}} \nonumber\\
+        &\le 2^{e-2}.
+\end{align}
+
+\noindent
+Continuing, we find
+
+\begin{align}
+    \eps_{2} &\le 2^{e-4} \nonumber\\
+    \eps_{3} &\le 2^{e-8} \nonumber\\
+        &\ \vdots
+\end{align}
+
+
+\subsubsection{\UnrolledTwo{}}
+\label{app:error_bounds:unrolled2}
+
+The initialization value is chosen to be the smallest power-of-two
+greater than to $\sqrt{n}$:
+
+\begin{equation}
+    x_{0} = 2^{e}.
+\end{equation}
+
+\noindent
+Note that strict inequality: we have $x_{0} > \sqrt{n}$.
+We have the error bound
+
+\begin{equation}
+    \eps_{0} \le 2^{e-1}.
+\end{equation}
+
+\noindent
+We now use this to bound $\eps_{1}$:
+
+\begin{align}
+    \eps_{1} &= \frac{\eps_{0}^{2}}{2x_{0}} \nonumber\\
+        &\le 2^{e-3}.
+\end{align}
+
+\noindent
+Continuing, we find
+
+\begin{align}
+    \eps_{2} &\le 2^{e-6} \nonumber\\
+    \eps_{3} &\le 2^{e-12} \nonumber\\
+        &\ \vdots
+\end{align}
+
+\noindent
+This shows that \UnrolledTwo{} converges slightly faster (has smaller error)
+than \UnrolledOne{}.
+This is due solely to the larger initial starting value.
+
+
+\subsubsection{\UnrolledThree{}}
+\label{app:error_bounds:unrolled3}
+
+The initialization value is chosen to be the arithmetic mean
+of the initializations for \UnrolledOne{} and \UnrolledTwo{}:
+
+\begin{equation}
+    x_{0} = 2^{e-1} + 2^{e-2}.
+\end{equation}
+
+\noindent
+We have the error bound
+
+\begin{equation}
+    \abs{\eps_{0}} \le 2^{e-2}.
+\end{equation}
+
+\noindent
+We now use this to bound $\eps_{1}$:
+
+\begin{align}
+    \eps_{1} &= \frac{\eps_{0}^{2}}{2x_{0}} \nonumber\\
+        &\le 2^{e-4.5}.
+\end{align}
+
+\noindent
+Here we are using the fact that $\log_{2}(1/3) < -1.5$.
+Continuing, we find
+
+\begin{align}
+    \eps_{2} &\le 2^{e-9} \nonumber\\
+    \eps_{3} &\le 2^{e-18} \nonumber\\
+        &\ \vdots
+\end{align}
+
+
+\subsubsection{\BitLength{}}
+\label{app:error_bounds:bitlength}
+
+We use the following approximation
+
+\begin{equation}
+    x_{0} = \begin{cases}
+        \floor{(27\cdot2^{e-1})/2^{4}} &\quad
+            \textsc{BitLength}(x) = 0 \mod 2 \\
+        \floor{(39\cdot2^{e-1})/2^{5}} &\quad
+            \textsc{BitLength}(x) = 1 \mod 2 \\
+    \end{cases}.
+\end{equation}
+
+\noindent
+We assume $x$ is an $f$-bit number:
+
+\begin{equation}
+    2^{f-1} \le x < 2^{f}, \quad f = 2e-k, \quad k\in\braces{0,1}.
+\end{equation}
+
+\begin{itemize}
+\item Case 0: $\textsc{BitLength}(x)$ is even or $k=0$.
+
+In this case, we have
+
+\begin{equation}
+    2^{2e-1} \le x < 2^{2e},
+\end{equation}
+
+\noindent
+whence it follows that
+
+\begin{equation}
+    \sqrt{2}\cdot2^{e-1} \le \sqrt{x} < 2^{e},
+\end{equation}
+
+\noindent
+Using the fact $45/32 < \sqrt{2}$, we have
+
+\begin{equation}
+    45\cdot2^{e-6} \le \sqrt{x} < 64\cdot2^{e-6}.
+\end{equation}
+
+\noindent
+Because we are choosing
+
+\begin{equation}
+    x_{0} \mathDef{} 27\cdot2^{e-5},
+\end{equation}
+
+\noindent
+we have
+
+\begin{equation}
+    \abs{\eps_{0}} \le 5\cdot2^{e-5}.
+\end{equation}
+
+It follows that
+
+\begin{align}
+    \eps_{1} &= \frac{\eps_{0}^{2}}{2x_{0}} \nonumber\\
+        &\le \frac{25}{27}2^{e-6} \nonumber\\
+        &\le 2^{e-6}.
+\end{align}
+
+\item Case 1: $\textsc{BitLength}(x)$ is odd or $k=1$.
+
+In this case, we have
+
+\begin{equation}
+    2^{2e-2} \le x < 2^{2e-1},
+\end{equation}
+
+\noindent
+whence it follows that
+
+\begin{equation}
+    \cdot2^{e-1} \le \sqrt{x} < \sqrt{2}\cdot2^{e-1},
+\end{equation}
+
+\noindent
+Using the fact $\sqrt{2} < 23/16$, we have
+
+\begin{equation}
+    16\cdot2^{e-5} \le \sqrt{x} < 23\cdot2^{e-5}.
+\end{equation}
+
+\noindent
+Because we are choosing
+
+\begin{equation}
+    x_{0} \mathDef{} 39\cdot2^{e-6},
+\end{equation}
+
+\noindent
+we have
+
+\begin{equation}
+    \abs{\eps_{0}} \le 7\cdot2^{e-6}.
+\end{equation}
+
+It follows that
+
+\begin{align}
+    \eps_{1} &= \frac{\eps_{0}^{2}}{2x_{0}} \nonumber\\
+        &\le \frac{49}{39}2^{e-7} \nonumber\\
+        &\le 2^{e-6.65},
+\end{align}
+
+\noindent
+where we are using the bound $\log_{2}(49/39) < 0.35$.
+\end{itemize}
+
+In the worst case, we have
+
+\begin{align}
+    \eps_{2} &\le 2^{e-12} \nonumber\\
+    \eps_{3} &\le 2^{e-24} \nonumber\\
+        &\ \vdots
+\end{align}
+
+\noindent
+We note that it is possible to get better error bounds,
+but they are not worth the effort.
+
+
+\subsubsection{\Linear{}}
+\label{app:error_bounds:linear}
+
+We start by scaling $x$ (relabeled as $m$) so that
+
+\begin{equation}
+    2^{2e-2} \le m < 2^{2e}.
+\end{equation}
+
+\noindent
+We then set
+
+\begin{equation}
+    v \mathDef{} \floor{\frac{m}{2^{2e-4}}}
+\end{equation}
+
+\noindent
+so that
+
+\begin{equation}
+    v\cdot2^{2e-4} \le m < \parens{v+1}\cdot2^{2e-4},
+    \quad v\in\braces{4, 5, \dots, 15}.
+\end{equation}
+
+\noindent
+This allows us to make the reduction to
+
+\begin{equation}
+    \sqrt{v}\cdot2^{e-2} \le \sqrt{m} < \sqrt{v+1}\cdot2^{e-2}.
+    \label{eq:app_linear_m_bound}
+\end{equation}
+
+In order to determine the appropriate approximation,
+we first find bounds for $\sqrt{v}$ and $\sqrt{v+1}$.
+In particular, we computed values $\nu_{v,0}, \nu_{v,1}\in\N$ with
+
+\begin{align}
+    \frac{\nu_{v,0}}{16} &\le \sqrt{v} \nonumber\\
+    \frac{\nu_{v,1}}{16} &\ge \sqrt{v+1}
+    \label{eq:app_linear_v_bound}
+\end{align}
+
+\noindent
+Using these values,
+we let
+
+\begin{equation}
+    \mu_{v} \mathDef{} 2\cdot(14 + v).
+\end{equation}
+
+The initial approximation is
+
+\begin{equation}
+    x_{0} = \mu_{v}\cdot2^{e-6}.
+\end{equation}
+
+\noindent
+We separate error calculations into two cases:
+
+\begin{itemize}
+\item Case 1: $v\in\braces{4, 5, 6, 7, 8}$
+
+In this case, the initial error is
+
+\begin{equation}
+    \eps_{0} \le 2^{e-4}
+\end{equation}
+
+\noindent
+and we have the error bounds
+
+\begin{align}
+    \eps_{1} &\le 2^{e-8} \nonumber\\
+    \eps_{2} &\le 2^{e-16} \nonumber\\
+        &\ \vdots
+\end{align}
+
+\item Case 2: $v\in\braces{9, 10, 11, 12, 13, 14, 15}$
+
+This case is more involved.
+We focus on the case $v=9$.
+We have the bound
+
+\begin{equation}
+    48\cdot2^{e-6} \le \sqrt{m} < 51\cdot2^{e-6}
+    \label{eq:app_linear_m_bound_v9}
+\end{equation}
+
+\noindent
+with
+
+\begin{equation}
+    \mu_{9} = 46\cdot2^{e-6}.
+\end{equation}
+
+\noindent
+As we can see, $\abs{\eps_{0}} \le 5\cdot2^{e-6}$.
+The error bound after the first Newton iteration is
+
+\begin{align}
+    \eps_{1} &= \frac{\eps_{0}^{2}}{2x_{0}} \nonumber\\
+        &\le \frac{25}{23}2^{e-8} \nonumber\\
+        &\le 2^{e-7.875}.
+\end{align}
+
+\noindent
+Here, we are using the bound $\log_{2}(25/23) < 0.125$.
+The second iteration bound gives
+
+\begin{align}
+    \eps_{2} &= \frac{\eps_{1}^{2}}{2x_{1}} \nonumber\\
+        &\le \frac{1}{24}2^{e-11.75} \nonumber\\
+        &\le 2^{e-16.25}.
+\end{align}
+
+\noindent
+Here, we are using the bound of $x_{1}\ge 48\cdot2^{e-6} = 24\cdot2^{e-5}$
+from Eq.~\eqref{eq:app_linear_m_bound_v9};
+we also use the bound $\log_{2}(1/24) < -4.5$.
+This bound for $x_{k}$ continues to be used for the next error bounds:
+
+\begin{align}
+    \eps_{3} &\le 2^{e-33} \nonumber\\
+    \eps_{4} &\le 2^{e-66.5} \nonumber\\
+    \eps_{5} &\le 2^{e-133.5} \nonumber\\
+        &\ \vdots
+\end{align}
+
+The cases of $v\in\braces{10, 11, 12, 13, 14, 15}$ are similar
+but we have $\abs{\eps_{0}} \le 3\cdot2^{e-5}$;
+we do not include the details.
+The important fact is that, in all cases, $\eps_{5}\le 2^{e-128}$.
+We note that the case $v=10$ is shown in
+Appendix~\ref{app:error_bounds:hyper4}.
+\end{itemize}
+
+
+\subsubsection{\HyperFour{}}
+\label{app:error_bounds:hyper4}
+
+Note that the error bound derivation here is essentially
+the same as that of \Linear{} in Appendix~\ref{app:error_bounds:linear}.
+The analysis is the same; the difference is the initialization value.
+
+We start by scaling $x$ (relabeled as $m$) so that
+
+\begin{equation}
+    2^{2e-2} \le m < 2^{2e}.
+\end{equation}
+
+\noindent
+We then set
+
+\begin{equation}
+    v \mathDef{} \floor{\frac{m}{2^{2e-4}}}
+\end{equation}
+
+\noindent
+so that
+
+\begin{equation}
+    v\cdot2^{2e-4} \le m < \parens{v+1}\cdot2^{2e-4},
+    \quad v\in\braces{4, 5, \dots, 15}.
+\end{equation}
+
+\noindent
+This allows us to make the reduction to
+
+\begin{equation}
+    \sqrt{v}\cdot2^{e-2} \le \sqrt{m} < \sqrt{v+1}\cdot2^{e-2}.
+    \label{eq:app_hyper4_m_bound}
+\end{equation}
+
+In order to determine the appropriate approximation,
+we first find bounds for $\sqrt{v}$ and $\sqrt{v+1}$.
+In particular, we computed values $\nu_{v,0}, \nu_{v,1}\in\N$ with
+
+\begin{align}
+    \frac{\nu_{v,0}}{16} &\le \sqrt{v} \nonumber\\
+    \frac{\nu_{v,1}}{16} &\ge \sqrt{v+1}
+    \label{eq:app_hyper4_v_bound}
+\end{align}
+
+\noindent
+Using these values,
+we set $\mu_{v}\in\N$ with
+
+\begin{equation}
+    \mu_{v} \mathDef{} 2\floor{\frac{512}{31-v}}.
+\end{equation}
+
+The initial approximation is
+
+\begin{equation}
+    x_{0} = \mu_{v}\cdot2^{e-6}.
+\end{equation}
+
+\noindent
+We separate error calculations into two cases:
+
+\begin{itemize}
+\item Case 1: $v\in\braces{4, 5, 6, 7, 8, 13, 14, 15}$
+
+In this case, the initial error is
+
+\begin{equation}
+    \eps_{0} \le 2^{e-4}
+\end{equation}
+
+\noindent
+and we have the error bounds
+
+\begin{align}
+    \eps_{1} &\le 2^{e-8} \nonumber\\
+    \eps_{2} &\le 2^{e-16} \nonumber\\
+        &\ \vdots
+\end{align}
+
+\item Case 2: $v\in\braces{9, 10, 11, 12}$
+
+This case is more involved.
+We focus on the case $v=10$ so as to not repeat the work from
+\Linear{} in Appendix~\ref{app:error_bounds:linear}.
+We have the bound
+
+\begin{equation}
+    25\cdot2^{e-5} \le \sqrt{m} < 27\cdot2^{e-5}
+    \label{eq:app_hyper_m_bound_v10}
+\end{equation}
+
+\noindent
+with
+
+\begin{equation}
+    \mu_{10} = 24\cdot2^{e-5}.
+\end{equation}
+
+\noindent
+We have absorbed the common factor of $2$ present
+in the previous two equations.
+As we can see, $\abs{\eps_{0}} \le 3\cdot2^{e-5}$.
+The error bound after the first Newton iteration is
+
+\begin{align}
+    \eps_{1} &= \frac{\eps_{0}^{2}}{2x_{0}} \nonumber\\
+        &\le \frac{9}{24}2^{e-6} \nonumber\\
+        &\le 2^{e-7.4}.
+\end{align}
+
+\noindent
+Here, we are using the bound $\log_{2}(9/24) < -1.4$.
+The second iteration bound gives
+
+\begin{align}
+    \eps_{2} &= \frac{\eps_{1}^{2}}{2x_{1}} \nonumber\\
+        &\le \frac{1}{25}2^{e-10.8} \nonumber\\
+        &\le 2^{e-15.44}.
+\end{align}
+
+\noindent
+Here, we are using the bound of $x_{1}\ge25\cdot2^{e-5}$
+from Eq.~\eqref{eq:app_hyper_m_bound_v10};
+we also use the bound $\log_{2}(1/25) < -4.64$.
+This bound for $x_{k}$ continues to be used for the next error bounds:
+
+\begin{align}
+    \eps_{3} &\le 2^{e-31.52} \nonumber\\
+    \eps_{4} &\le 2^{e-63.68} \nonumber\\
+    \eps_{5} &\le 2^{e-128} \nonumber\\
+        &\ \vdots
+\end{align}
+
+The case of $v = 9$ was shown in Appendix~\ref{app:error_bounds:linear}
+and the case is similar for $v\in\braces{11,12}$
+as $\abs{\eps_{0}} \le 3\cdot2^{e-5}$;
+we do not include the details.
+The important fact is that, in all cases, $\eps_{5}\le 2^{e-128}$.
+\end{itemize}
+
+
+\subsubsection{\LookupFour{}}
+\label{app:error_bounds:lookup4}
+
+We start by scaling $x$ (relabeled as $m$) so that
+
+\begin{equation}
+    2^{2e-2} \le m < 2^{2e}.
+\end{equation}
+
+\noindent
+We then set
+
+\begin{equation}
+    v \mathDef{} \floor{\frac{m}{2^{2e-4}}}
+\end{equation}
+
+\noindent
+so that
+
+\begin{equation}
+    v\cdot2^{2e-4} \le m < \parens{v+1}\cdot2^{2e-4},
+    \quad v\in\braces{4, 5, \dots, 15}.
+\end{equation}
+
+\noindent
+This allows us to make the reduction to
+
+\begin{equation}
+    \sqrt{v}\cdot2^{e-2} \le \sqrt{m} < \sqrt{v+1}\cdot2^{e-2}.
+    \label{eq:app_lookup4_m_bound}
+\end{equation}
+
+In order to determine the appropriate approximation,
+we first find bounds for $\sqrt{v}$ and $\sqrt{v+1}$.
+In particular, we computed values $\nu_{v,0}, \nu_{v,1}\in\N$ with
+
+\begin{align}
+    \frac{\nu_{v,0}}{8} &\le \sqrt{v} \nonumber\\
+    \frac{\nu_{v,1}}{8} &\ge \sqrt{v+1}.
+    \label{eq:app_lookup4_v_bound}
+\end{align}
+
+\noindent
+Combining Eqs.~\eqref{eq:app_lookup4_m_bound} and
+\eqref{eq:app_lookup4_v_bound},
+we have
+
+\begin{equation}
+    \nu_{i,0}\cdot2^{e-5} \le \sqrt{m} < \nu_{i,1}\cdot2^{e-5}.
+\end{equation}
+
+\noindent
+We note that
+
+\begin{equation}
+    \max_{v} \abs{\nu_{v,1} - \nu_{v,0}} = 3.
+\end{equation}
+
+\noindent
+This allows values $\mu_{v}\in\N$ to be chosen so that
+
+\begin{equation}
+    \abs{\nu_{v,i} - \mu_{v}} \le 2.
+\end{equation}
+
+The initial approximation is
+
+\begin{equation}
+    x_{0} = \mu_{v}\cdot2^{e-5}
+\end{equation}
+
+\noindent
+and the initial error is
+
+\begin{equation}
+    \eps_{0} \le 2^{e-4}.
+\end{equation}
+
+\noindent
+This gives the error bounds
+
+\begin{align}
+    \eps_{1} &\le 2^{e-8} \nonumber\\
+    \eps_{2} &\le 2^{e-16} \nonumber\\
+        &\ \vdots
+\end{align}
+
+
+\subsubsection{\LookupEight{}}
+\label{app:error_bounds:lookup8}
+
+We start by scaling $x$ (relabeled as $m$) so that
+
+\begin{equation}
+    2^{2e-2} \le m < 2^{2e}.
+\end{equation}
+
+\noindent
+We then set
+
+\begin{equation}
+    v \mathDef{} \floor{\frac{m}{2^{2e-8}}}
+\end{equation}
+
+\noindent
+so that
+
+\begin{equation}
+    v\cdot2^{2e-8} \le m < \parens{v+1}\cdot2^{2e-8},
+    \quad v\in\braces{64, 65, \dots, 255}.
+\end{equation}
+
+\noindent
+This allows us to make the reduction to
+
+\begin{equation}
+    \sqrt{v}\cdot2^{e-4} \le \sqrt{m} < \sqrt{v+1}\cdot2^{e-4}.
+    \label{eq:app_lookup8_m_bound}
+\end{equation}
+
+In order to determine the appropriate approximation,
+we first find bounds for $\sqrt{v}$ and $\sqrt{v+1}$.
+In particular, we computed values $\nu_{v,0}, \nu_{v,1}\in\N$ with
+
+\begin{align}
+    \frac{\nu_{v,0}}{32} &\le \sqrt{v} \nonumber\\
+    \frac{\nu_{v,1}}{32} &\ge \sqrt{v+1}.
+    \label{eq:app_lookup8_v_bound}
+\end{align}
+
+\noindent
+Combining Eqs.~\eqref{eq:app_lookup8_m_bound} and
+\eqref{eq:app_lookup8_v_bound},
+we have
+
+\begin{equation}
+    \nu_{i,0}\cdot2^{e-9} \le \sqrt{m} < \nu_{i,1}\cdot2^{e-9}.
+\end{equation}
+
+\noindent
+We note that
+
+\begin{equation}
+    \max_{v} \abs{\nu_{v,1} - \nu_{v,0}} = 3.
+\end{equation}
+
+\noindent
+This allows values $\mu_{v}\in\N$ to be chosen so that
+
+\begin{equation}
+    \abs{\nu_{v,i} - \mu_{v}} \le 2.
+\end{equation}
+
+The initial approximation is
+
+\begin{equation}
+    x_{0} = \mu_{v}\cdot2^{e-9}
+\end{equation}
+
+\noindent
+and the initial error is
+
+\begin{equation}
+    \eps_{0} \le 2^{e-8}.
+\end{equation}
+
+\noindent
+This gives the error bounds
+
+\begin{align}
+    \eps_{1} &\le 2^{e-16} \nonumber\\
+    \eps_{2} &\le 2^{e-32} \nonumber\\
+        &\ \vdots
+\end{align}
+
+
+\subsection{Final Check}
+\label{app:final_check}
+
+We now discuss the final check performed in the new algorithms
+and discuss a potential issue with checks performed
+in other algorithms found online.
+
+\paragraph{Possible Values at the end of Newton Iterations}
+In the case of algorithms performing unrolled Newton iterations,
+all algorithms perform iterations until $\eps_{k}\le 1$.
+This ensures that $r\in\braces{q,q+1}$ with respect
+to error bounds.
+This is also ensured even if the iteration oscillates.
+Thus, we must ensure that we return the correct value.
+
+\paragraph{Confirm if Integer Square Root}
+Given that we have $r\in\braces{q,q+1}$,
+we can check if $r^{2}\le n$:
+if this is true, then $r=q$; otherwise, $r=q+1$.
+The return logic is not too expensive,
+although care must be taken to ensure that no overflow occurs.
+Thus, in the newly developed algorithms,
+the case $n\ge(2^{128}-1)^{2}$ is handled separately with an \texttt{if}
+statement at the beginning.
+
+\paragraph{Return Minimum}
+We note that in some of the algorithms found online
+(\prb{} (Listing~\ref{list:prb-newton})~\cite{prb-math},
+\OpenZeppelin{} (Listing~\ref{list:oz-newton})~\cite{open-zeppelin}, and
+\abdk{} (Listing~\ref{list:abdk-newton})~\cite{abdk-consulting})
+the final check is of the form
+
+\begin{equation}
+    \Return \quad\min\parens{r, n/r}.
+\end{equation}
+
+\noindent
+This is done after applying 7 Newton iterations.
+
+It is not clear that this logic ensures the correct value is returned.
+These algorithms have the same initialization
+as in \UnrolledOne{} and perform 7 Newton iterations, so we know
+$r\in\braces{q, q+1}$.
+
+Suppose we have
+
+\begin{equation}
+    n = q^{2} + \ell, \quad\ell\in\braces{0,\dots,q-1}.
+    \label{eq:return_min:n_def}
+\end{equation}
+
+\noindent
+Then we see
+
+\begin{equation}
+    n = \parens{q-1}\parens{q+1} + \parens{1+\ell}
+\end{equation}
+
+\noindent
+so that
+
+\begin{equation}
+    \floor{\frac{n}{q+1}} = q-1.
+\end{equation}
+
+\noindent
+This shows that if $n$ is as specified and we have $r=q+1$
+after the final Newton iteration (which is possible with the current analysis),
+then $\min(r, n/r) = n/r = q-1$, which is incorrect.
+Thus, the current analysis will not ensure that this return logic
+will always give the correct result.
+
+We note that although we have shown that it is \emph{possible} for
+\prb{}, \OpenZeppelin{}, and \abdk{}
+to return incorrect results (that is, results which are off by 1),
+we must mention that there is no known value where this error occurs.
+That is to say, the current analysis is \emph{unable to prove
+the algorithms are correct},
+but that is not the same as \emph{proving they are incorrect}.
+With that said, these algorithms operate on \texttt{uint256}
+values and approximately half of all integers are of the form described
+in Eq.~\eqref{eq:return_min:n_def},
+so it is not possible to manually check each possible value
+to ensure a valid result is returned.
+Thus, if \prb{}, \OpenZeppelin{}, and \abdk{} are to be proven correct,
+additional analysis is required.
+
+\subsection{Convergence Proofs}
+
+We now combine the results from the previous sections.
+They are straightforward at this point.
+
+\subsubsection{Proof of General Newton Iteration}
+\label{proof:general_newton}
+
+We start by proving Algorithm~\ref{alg:cohen_isqrt}
+(from \cite[Algorithm 1.7.1]{cohen1993})
+produces the correct result.
+This is included for completeness,
+and the proof provided here is essentially that
+of~\cite[Algorithm 1.7.1, Proof]{cohen1993}.
+
+First, $x$ decreases at every iteration.
+Because $n$ is finite, the algorithm must eventually terminate.
+We set $q = \floor{\sqrt{n}}$.
+From the discussion above, we always have $\parens{t + n/t}/2 \ge \sqrt{n}$
+for all $t > 0$,
+so we always have $x\ge q$.
+We see
+
+\begin{equation}
+    y - x = \floor{\frac{n - x^{2}}{2x}}.
+\end{equation}
+
+\noindent
+It follows that $x > \sqrt{n}$ iff $n - x^{2} < 0$ iff $y < x$.
+We also have $x \le \sqrt{n}$ iff $n - x^{2} \ge 0$ iff $y\ge x$.
+Thus, $y\ge x$ implies that $x \le \sqrt{n}$.
+Because $x\in\N$ and $q\le x \le \sqrt{n}$, it follows that $x = q$.
+Thus, the algorithm returns the correct result.
+
+\emph{Note:} the only place we used the initialization value
+is to ensure that we initially have $x \ge \floor{\sqrt{n}}$.
+Thus, provided the initialization value always satisfies this,
+this proof may be applied.
+
+\subsubsection{Proof of Newton Iteration Fixed Points}
+\label{proof:newton_fixed_points}
+
+We now prove that for $q = \floor{\sqrt{n}}$ we have
+$q$ is a fixed point of $g_{n}$ (that is, $g_{n}(q) = q$)
+iff $n+1$ is not a square.
+
+We let $y = g_{n}(x)$ as in Appendix~\ref{proof:general_newton}.
+The work there shows that $x>\sqrt{n}$ implies that $y<x$;
+additionally, for $x<q$ we have $y>x$.
+This holds for all $n$.
+So, we only need to investigate the case $x = q$.
+
+From the definition of $q = \floor{\sqrt{n}}$ we have
+
+\begin{equation}
+    q^{2} \le n < \parens{q+1}^{2}.
+\end{equation}
+
+\noindent
+This implies
+
+\begin{equation}
+    q^{2} \le n \le \parens{q+2}q
+\end{equation}
+
+\noindent
+so that
+
+\begin{equation}
+    \floor{\frac{n}{q}}\in\braces{q, q+1, q+2}.
+\end{equation}
+
+\noindent
+It follows that
+
+\begin{equation}
+    g_{n}(q) = \begin{cases}
+        q &\quad \floor{n/q} = q \\
+        q &\quad \floor{n/q} = q+1 \\
+        q+1 &\quad \floor{n/q} = q+2 \\
+    \end{cases}.
+\end{equation}
+
+\noindent
+We note that when $n = a^{2} - 1$ (that is, when $n+1$ is a square)
+$q$ is not a fixed point for $g_{n}$.
+We note that the result will oscillate as $q, q+1, q, q+1, \dots$.
+
+\subsubsection{\UnrolledOne{}}
+
+From the error bounds in Appendix~\ref{app:error_bounds:unrolled1},
+we see that $\eps_{7}\le1$ (we require 7 Newton iterations).
+Thus, $r\in\braces{q,q+1}$, and the return logic
+discussed in Appendix~\ref{app:final_check} ensures the correct result.
+
+\subsubsection{\UnrolledTwo{}}
+
+From the error bounds in Appendix~\ref{app:error_bounds:unrolled2},
+we see that $\eps_{7}\le1$ (we require 7 Newton iterations).
+Thus, $r\in\braces{q,q+1}$, and the return logic
+discussed in Appendix~\ref{app:final_check} ensures the correct result.
+
+\subsubsection{\UnrolledThree{}}
+
+From the error bounds in Appendix~\ref{app:error_bounds:unrolled3},
+we see that $\eps_{6}\le1$ (we require 6 Newton iterations).
+Thus, $r\in\braces{q,q+1}$, and the return logic
+discussed in Appendix~\ref{app:final_check} ensures the correct result.
+
+\subsubsection{\WhileOne{}}
+
+After the first Newton iteration, we have $r\ge q$;
+the proof in Appendix~\ref{proof:general_newton} then applies.
+The first Newton iteration \emph{is required} for this proof to be valid.
+
+\subsubsection{\WhileTwo{}}
+
+The proof in Appendix~\ref{proof:general_newton} applies
+because $r > \sqrt{n}$.
+
+\subsubsection{\WhileThree{}}
+
+After the first Newton iteration, we have $r\ge q$;
+the proof in Appendix~\ref{proof:general_newton} then applies.
+The first Newton iteration \emph{is required} for this proof to be valid.
+
+\subsubsection{\BitLength{}}
+\label{app:conv_proof:bitlength}
+
+We let $k\in\N$ and suppose we have
+
+\begin{equation}
+    2^{2k-2} \le x < 2^{2k}
+\end{equation}
+
+\noindent
+After the \texttt{if (result >= (1 << 2))} statement,
+we will have $e = 2k-1$.
+
+If the statement \texttt{if (result >= (1 << 1))} is \textsf{True},
+then this means that we actually have the bitlength is equal to $2k$.
+We have
+
+\begin{equation}
+    r = 27\cdot 2^{k-5}.
+\end{equation}
+
+\noindent
+Otherwise, \texttt{if (result >= (1 << 1))} is \textsf{False}
+and we have the bitlength is equal to $2k-1$,
+We have
+
+\begin{equation}
+    r = 39\cdot 2^{k-6}.
+\end{equation}
+
+From the error bounds in Appendix~\ref{app:error_bounds:bitlength},
+we see that $\eps_{6}\le1$ (we require 6 Newton iterations).
+Thus, $r\in\braces{q,q+1}$, and the return logic
+discussed in Appendix~\ref{app:final_check} ensures the correct result.
+
+\subsubsection{\Linear{}}
+\label{app:conv_proof:linear}
+
+\paragraph{Initial Scaling}
+We show that we properly scale $x$ so that $2^{254}\le m < 2^{256}$.
+
+We let $k\in\N$ such that
+
+\begin{equation}
+    2^{2k-2} \le x < 2^{2k}.
+    \label{eq:conv_proof:linear:initial_scale}
+\end{equation}
+
+\noindent
+In this case, we see that the ``bitlength'' $b$ is
+
+\begin{equation}
+    b \mathDef{} 2k-1.
+\end{equation}
+
+\noindent
+The ``bitlength'' $b$ is the scaling factor $e$ before it is overwritten.
+From here, we compute the scaling factor
+
+\begin{equation}
+    e \mathDef{} 128 - k.
+\end{equation}
+
+\noindent
+We define
+
+\begin{equation}
+    m \mathDef{} x \cdot 2^{2e}.
+\end{equation}
+
+\noindent
+From Eq.~\eqref{eq:conv_proof:linear:initial_scale},
+we see
+
+\begin{align}
+    m &= 2^{2e}x \nonumber\\
+        &\ge 2^{256 - 2k} \cdot 2^{2k-2} \nonumber\\
+        &= 2^{254}
+\end{align}
+
+\noindent
+and
+
+\begin{align}
+    m &= 2^{2e}x \nonumber\\
+        &\le 2^{256 - 2k} \cdot 2^{2k} \nonumber\\
+        &= 2^{256}.
+\end{align}
+
+\noindent
+Together, these imply
+
+\begin{equation}
+    2^{254} \le m < 2^{256},
+\end{equation}
+
+\noindent
+as desired.
+
+\paragraph{Error Bounds}
+From the error bounds in Appendix~\ref{app:error_bounds:linear},
+we see that $\eps_{5}\le1$ (we require 5 Newton iterations).
+Thus, $r\in\braces{q,q+1}$ for $q = \floor{\sqrt{m}}$.
+
+\paragraph{Final Scaling and Check}
+At this point, we have $r\in\braces{q,q+1}$ for $q=\floor{\sqrt{m}}$.
+This means
+
+\begin{equation}
+    \parens{r-1}^{2} \le m < \parens{r+1}^{2}.
+    \label{eq:app_proof:scaling:final_initial}
+\end{equation}
+
+We set
+
+\begin{equation}
+    r = s2^{e} + t, \quad t\in\braces{0,1,\cdots,2^{e-1}}.
+\end{equation}
+
+\noindent
+This implies that
+
+\begin{equation}
+    s = \floor{\frac{r}{2^{e}}}.
+\end{equation}
+
+\noindent
+We see
+
+\begin{align}
+    \parens{r-1}^{2} &= \parens{s2^{e} + t - 1}^{2} \ge 2^{2e}\parens{s-1}^{2}
+        \nonumber\\
+    \parens{r+1}^{2} &= \parens{s2^{e} + t + 1}^{2} \le 2^{2e}\parens{s+1}^{2}.
+\end{align}
+
+\noindent
+After substituting $m=2^{2e}x$ and using the previous inequalities,
+Eq.~\eqref{eq:app_proof:scaling:final_initial} reduces to
+
+\begin{equation}
+    2^{2e}\parens{s-1}^{2} \le 2^{2e}x < 2^{2e}\parens{s+1}^{2}
+\end{equation}
+
+\noindent
+or
+
+\begin{equation}
+    \parens{s-1}^{2} \le x < \parens{s+1}^{2}.
+\end{equation}
+
+\noindent
+Thus, $s\in\braces{z, z+1}$ for $z=\floor{\sqrt{x}}$.
+The final check ensures we return the correct result.
+There is no overflow because we take care of the edge case
+when $\floor{\sqrt{x}} = 2^{128} - 1$;
+this ensures that $s\le 2^{128} - 1$, so $s^{2} < 2^{256}$
+and no overflow occurs.
+
+\subsubsection{\HyperFour{}}
+\label{app:conv_proof:hyper4}
+
+\paragraph{Initial Scaling}
+See the discussion in Appendix~\ref{app:conv_proof:linear}.
+
+\paragraph{Error Bounds}
+From the error bounds in Appendix~\ref{app:error_bounds:hyper4},
+we see that $\eps_{5}\le1$ (we require 5 Newton iterations).
+Thus, $r\in\braces{q,q+1}$ for $q = \floor{\sqrt{m}}$.
+
+\paragraph{Final Scaling and Check}
+See the discussion in Appendix~\ref{app:conv_proof:linear}.
+This shows the correct result is returned.
+
+\subsubsection{\LookupFour{}}
+\label{app:conv_proof:lookup4}
+
+\paragraph{Initial Scaling}
+See the discussion in Appendix~\ref{app:conv_proof:linear}.
+
+\paragraph{Error Bounds}
+From the error bounds in Appendix~\ref{app:error_bounds:lookup4},
+we see that $\eps_{5}\le1$ (we require 5 Newton iterations).
+Thus, $r\in\braces{q,q+1}$ for $q = \floor{\sqrt{m}}$.
+
+\paragraph{Final Scaling and Check}
+See the discussion in Appendix~\ref{app:conv_proof:linear}.
+This shows the correct result is returned.
+
+\subsubsection{\LookupEight{}}
+
+\paragraph{Initial Scaling}
+See the discussion in Appendix~\ref{app:conv_proof:linear}.
+
+\paragraph{Error Bounds}
+From the error bounds in Appendix~\ref{app:error_bounds:lookup8},
+we see that $\eps_{4}\le1$ (we require 4 Newton iterations).
+Thus, $r\in\braces{q,q+1}$ for $q = \floor{\sqrt{m}}$.
+
+\paragraph{Final Scaling and Check}
+See the discussion in Appendix~\ref{app:conv_proof:linear}.
+This shows the correct result is returned.

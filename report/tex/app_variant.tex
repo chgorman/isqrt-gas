@@ -1,0 +1,26 @@
+\section{Variants of \UnrolledThree{}}
+\label{app:variants_unrolled3}
+
+We include an additional algorithm
+\UnrolledThreeV{} (Listing~\ref{list:newton-unrolled-3v2}),
+which is a modified version of the \UnrolledThree{} algorithm.
+
+The results for the same analyses (standard and extended) between
+\UnrolledThree{} and \UnrolledThreeV{} are included
+in Tables~\ref{table:gas_costs_unrolled3},
+\ref{table:minimal_gas_costs_unrolled3},
+\ref{table:minimal_gas_costs_ed_unrolled3}, and
+\ref{table:minimal_gas_costs_er_unrolled3}.
+As we can see, there is no clear-cut winner.
+\UnrolledThreeV{} has a lower maximum gas cost while
+\UnrolledThree{} has lower mean and median gas cost.
+Furthermore, although \UnrolledThree{} has minimal gas cost
+in the majority of instances (between 55\% and 57\% of the time),
+this is not a large margin.
+It is unclear to the author why exactly this is the case.
+He chose to use \UnrolledThree{} as the recommended algorithm
+over \UnrolledThreeV{} because of the lower average gas cost
+and majority of minimal gas cost.
+
+\input{tables/unrolled_gas.tex}
+\input{code/newton_unrolled_3v2.tex}
