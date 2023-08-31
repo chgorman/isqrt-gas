@@ -28,22 +28,29 @@ the integer part of the square root of $a$.
 
 \subsection{Computation Methods}
 
-Most methods for computing integer square roots are based
-on Newton's method for computing square roots;
+One method for computing integer square roots is based
+on Newton's method;
 see~\cite[Algorithm 1.7.1]{cohen1993},
 \cite[Algorithm 9.2.11]{PrimeNumbersACP2005},
 and  \cite[Algorithm 1.13]{ModernComputerArithmetic051}.
 Another method based on approximate square roots
 may be found in \cite{PythonIsqrt}.
 These algorithms usually come with a proof of correctness.
+For completeness, we reproduce~\cite[Algorithm 1.7.1]{cohen1993}
+in Algorithm~\ref{alg:cohen_isqrt},
+and include a modified version of the
+proof~\cite[Algorithm 1.7.1, Proof]{cohen1993}
+in Appendix~\ref{proof:general_newton}.
 
-The focus on this work is on computation within the Ethereum Virtual Machine.
-There is no native integer square root operation,
-so this operation must be performed using only basic integer operations.
-Given that this is a fundamental operation,
-it is important for this operation to be as efficient as possible
+\input{algs/cohen_isqrt.tex}
+
+The focus of this work is on computation within the Ethereum Virtual Machine.
+There is no native integer square root function,
+so this must be computed using only basic integer operations.
+It is important for this fundamental operation to be efficient
 \emph{and provably correct}.
-The focus on this work is to look at various algorithms found online
+We look at various algorithms found online
 and compare them to see which is most efficient.
-Additional algorithms have been included which are \emph{provably correct};
-none of the referenced algorithms found online have a correctness proof.
+Additional algorithms have been included in the analysis
+which are \emph{provably correct};
+none of the algorithms found online have a correctness proof.

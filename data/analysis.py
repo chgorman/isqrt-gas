@@ -178,7 +178,7 @@ for alg_index in range(total_algs):
         fig, axs = plt.subplots(1, 1)
 
         # plot the functions
-        plt.title(r'Minimal ISqrt Gas Cost (' + file_names[alg_index] + ')')
+        plt.title(r'Minimal Isqrt Gas Cost (' + file_names[alg_index] + ')')
         plt.xlabel('Argument', fontsize=24)
         plt.ylabel('Gas Cost', fontsize=24)
         plt.scatter(min_value_array, min_gas_array, s = 3.0)
@@ -196,7 +196,7 @@ for alg_index in range(total_algs):
         # Histogram Plot
         fig, axs = plt.subplots(1, 1)
         num_bins = 64
-        plt.title(r'Minimal ISqrt Gas Histogram ('+ file_names[alg_index] +')')
+        plt.title(r'Minimal Isqrt Gas Histogram ('+ file_names[alg_index] +')')
         plt.xlabel('Argument', fontsize=24)
         plt.ylabel('Number', fontsize=24)
         # compute logarithmic bins
@@ -205,7 +205,7 @@ for alg_index in range(total_algs):
         plt.hist(min_value_array, bins=log_bins)
         plt.xscale('log', base=2)
         plt.xlim([1, 2.0**256.0])
-        plt.ylim([0, 40])
+        plt.ylim([0, 35])
         axs.xaxis.set_ticks([2.0**(32*k) for k in range(1,8)])
 
         # show the plot

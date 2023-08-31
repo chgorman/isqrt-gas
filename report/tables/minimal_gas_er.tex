@@ -4,16 +4,78 @@
 \hline
 Total & 16384 \\
 \hline
+\cellcolor{yellow!15} \UnrolledThree{} & \cellcolor{yellow!15} 7612 \\
+\WhileOne{}      &  1537 \\
+\WhileTwo{}      &   697 \\
+\WhileThree{}    &  2347 \\
+\cellcolor{yellow!15} \Linear{}        & \cellcolor{yellow!15} 4195 \\
+\hline
+\end{tabular}
+\caption[Minimal Gas Costs Statistics]{Here are the number of times
+    each method had minimal gas cost;
+    these are results for the additional loguniform random values.
+    These results are for the tests in Appendix~\ref{app:loguniform}.
+    }
+\label{table:minimal_gas_costs_er}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|S[table-format=5.0]|}
+\hline
+Total & 16384 \\
+\hline
 \cellcolor{yellow!25} \UnrolledThree{} & \cellcolor{yellow!25} 11806 \\
 \WhileOne{}      &  1537 \\
 \WhileTwo{}      &   697 \\
 \WhileThree{}    &  2347 \\
 \hline
 \end{tabular}
-\caption[Minimal Gas Costs Statistics]{Here are number of times
-    each method had minimal gas costs;
+\caption[Minimal Gas Costs Statistics]{Here are the number of times
+    each method had minimal gas cost;
     these are results for the additional loguniform random values.
-    These results are for the tests in Appendix~\ref{app:loguniform}.
+    These results are for the tests in Appendix~\ref{app:loguniform}
+    without \Linear{}.
     }
-\label{table:minimal_gas_costs_er}
+\label{table:minimal_gas_costs_er_no_linear}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|S[table-format=5.0]|}
+\hline
+Total & 16384 \\
+\hline
+\WhileOne{}      &  1537 \\
+\WhileTwo{}      &   697 \\
+\WhileThree{}    &  2347 \\
+\cellcolor{yellow!25} \Linear{} & \cellcolor{yellow!25} 11806 \\
+\hline
+\end{tabular}
+\caption[Minimal Gas Costs Statistics]{Here are the number of times
+    each method had minimal gas cost;
+    these are results for the additional loguniform random values.
+    These results are for the tests in Appendix~\ref{app:loguniform}
+    without \UnrolledThree{}.
+    }
+\label{table:minimal_gas_costs_er_no_unrolled}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|S[table-format=5.0]|}
+\hline
+Total & 16384 \\
+\hline
+\cellcolor{yellow!25} \UnrolledThree{} & \cellcolor{yellow!25} 11291 \\
+\Linear{} & 5094 \\
+\hline
+\end{tabular}
+\caption[Minimal Gas Costs Statistics]{Here are the number of times
+    each method had minimal gas cost;
+    these are results for the additional loguniform random values.
+    These results are for the tests in Appendix~\ref{app:loguniform}
+    comparing \UnrolledThree{} and \Linear{}.
+    }
+\label{table:minimal_gas_costs_er_unrolled_linear}
 \end{table}
