@@ -1,0 +1,21 @@
+\begin{algorithm}[t]
+\caption{Integer Square Root algorithm found
+    in~\cite[Algorithm 1.7.1]{cohen1993}.
+    We include the following from~\cite[Chapter 1.7, Remarks]{cohen1993}:
+    ``When actually implementing this algorithm,
+    the initialization step must be modified.''}
+\label{alg:cohen_isqrt}
+\begin{algorithmic}[1]
+\Require $n$ is a positive integer
+\Procedure{IntegerSquareRoot}{$n$}
+    \State $x \algAssign{} n$
+    \State $y \algAssign{} \floor{\parens{x + n/x}/2}$
+    \Comment{All operations are integer operations}
+    \While{$x > y$}
+        \State $x \algAssign{} y$
+        \State $y \algAssign{} \floor{\parens{x + n/x}/2}$
+    \EndWhile
+    \State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

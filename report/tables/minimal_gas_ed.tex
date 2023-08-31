@@ -4,17 +4,82 @@
 \hline
 Total & 33154 \\
 \hline
+\cellcolor{yellow!15} \UnrolledThree{} & \cellcolor{yellow!15} 10103 \\
+\cellcolor{yellow!15} \WhileOne{}      & \cellcolor{yellow!15} 15639 \\
+\WhileTwo{}      &   130 \\
+\WhileThree{}    &  1625 \\
+\cellcolor{yellow!15} \Linear{}        & \cellcolor{yellow!15}  5671 \\
+\hline
+\end{tabular}
+\caption[Minimal Gas Costs Statistics]{Here are the number of times
+    each method had minimal gas cost;
+    these are results for the additional deterministic values
+    based around powers-of-two.
+    These results are for the tests in Appendix~\ref{app:deterministic}.
+    }
+\label{table:minimal_gas_costs_ed}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|S[table-format=5.0]|}
+\hline
+Total & 33154 \\
+\hline
 \cellcolor{yellow!25} \UnrolledThree{} & \cellcolor{yellow!25} 15769 \\
 \cellcolor{yellow!15} \WhileOne{}      & \cellcolor{yellow!15} 15639 \\
 \WhileTwo{}      &   130 \\
 \WhileThree{}    &  1625 \\
 \hline
 \end{tabular}
-\caption[Minimal Gas Costs Statistics]{Here are number of times
-    each method had minimal gas costs;
+\caption[Minimal Gas Costs Statistics]{Here are the number of times
+    each method had minimal gas cost;
     these are results for the additional deterministic values
-    based around powers-of-2.
-    These results are for the tests in Appendix~\ref{app:deterministic}.
+    based around powers-of-two.
+    These results are for the tests in Appendix~\ref{app:deterministic}
+    without \Linear{}.
     }
-\label{table:minimal_gas_costs_ed}
+\label{table:minimal_gas_costs_ed_no_linear}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|S[table-format=5.0]|}
+\hline
+Total & 33154 \\
+\hline
+\cellcolor{yellow!15} \WhileOne{} & \cellcolor{yellow!15} 15639 \\
+\WhileTwo{}      &   130 \\
+\WhileThree{}    &  1625 \\
+\cellcolor{yellow!25} \Linear{}   & \cellcolor{yellow!25} 15769 \\
+\hline
+\end{tabular}
+\caption[Minimal Gas Costs Statistics]{Here are the number of times
+    each method had minimal gas cost;
+    these are results for the additional deterministic values
+    based around powers-of-two.
+    These results are for the tests in Appendix~\ref{app:deterministic}
+    without \UnrolledThree{}.
+    }
+\label{table:minimal_gas_costs_ed_no_unrolled}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|S[table-format=5.0]|}
+\hline
+Total & 33154 \\
+\hline
+\cellcolor{yellow!25} \UnrolledThree{} & \cellcolor{yellow!25} 21818 \\
+\Linear{}        & 11410 \\
+\hline
+\end{tabular}
+\caption[Minimal Gas Costs Statistics]{Here are the number of times
+    each method had minimal gas cost;
+    these are results for the additional deterministic values
+    based around powers-of-two.
+    These results are for the tests in Appendix~\ref{app:deterministic}
+    comparing \UnrolledThree{} and \Linear{}.
+    }
+\label{table:minimal_gas_costs_ed_unrolled_linear}
 \end{table}
