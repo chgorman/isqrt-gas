@@ -1,0 +1,120 @@
+\section{Gas Costs}
+\label{app:gas_costs}
+
+We look at the specific gas costs of some operations;
+these will be useful in later discussions when making comparisons
+between different methods.
+
+\subsection{Initializations}
+\label{app_gas_costs:initializations}
+
+We look at initialization costs associated with the algorithms;
+see Table~\ref{table:initialzation_gas_costs} for the results.
+
+Some of the initializations are self-explanatory.
+We note that \texttt{Newton1} is used by \UnrolledOne{} and \WhileOne{};
+\texttt{Newton2} is used by \UnrolledTwo{} and \WhileTwo{};
+\texttt{Newton3} is used by \WhileThree{};
+and \texttt{Newton3-Var} is used by \UnrolledThree{}.
+The test used the value $2^{256}-1$ to compute the gas cost.
+We ignore return logic but include gas costs associated
+with getting the input to and from the proper range;
+this is used in \Linear{}, to give one example.
+
+\texttt{Newton} and \texttt{Newton-Var} have similar gas values;
+a notable difference is seen in 
+\texttt{Newton3} and \texttt{Newton3-Var},
+and this is why \UnrolledThree{} uses the \texttt{Newton3-Var} initialization.
+\Linear{} has the lowest initialization out of the non-\texttt{Newton}s;
+this (coupled with only needing 5 Newton iterations)
+shows why this method had such good results in Table~\ref{table:gas_costs_3}.
+This also suggests that more complex initializations will
+not lead to overall improvements,
+as \HyperFour{} gives the same accuracy and is only slightly more complicated
+yet costs significantly more gas.
+It is interesting to see that \LookupFour{} and \LookupEight{}
+have such expensive initializations;
+this suggests that no lookup-table-based method will be competitive.
+
+\input{tables/initialization_cost.tex}
+
+\subsection{Iterations}
+\label{app_gas_costs:iterations}
+
+\input{tables/iteration_cost.tex}
+
+\subsubsection{Newton Iteration}
+\label{app_gas_costs:newton}
+
+We look at the data in Table~\ref{table:newton_iteration_gas_costs},
+which lists the gas costs associated with varying
+the number of Newton iterations;
+the \texttt{Newton3} initialization is used,
+although there is no return logic.
+Each Newton iteration costs 48 gas,
+although the difference between $0$ and $1$ Newton iteration is $55$ gas.
+These tests used the value $3\cdot2^{160}$
+(to enable a direct comparison with the Halley iteration results
+in Appendix~\ref{app_gas_costs:halley}).
+
+\subsubsection{While Iteration}
+\label{app_gas_costs:while}
+
+It is not as straightforward to determine the cost per \texttt{while} loop
+within \WhileOne{}, \WhileTwo{}, and \WhileThree{},
+as the total number of iterations must be known
+(by running the analogous computation).
+To do so, we choose values of the same bitlength and determined
+the number of required iterations manually.
+The results may be found in Table~\ref{table:while_iteration_gas_costs};
+as we can see,
+each \texttt{while} loop costs 90 gas,
+which makes each iteration almost twice as expensive
+as the unrolled version.
+
+From this we see that while it is clear that \emph{certain}
+integer square root values may be computed more efficiently
+using \texttt{while} loops,
+in general this results in a more expensive operation.
+
+\subsubsection{Halley Iteration}
+\label{app_gas_costs:halley}
+
+We look at the data in Table~\ref{table:halley_iteration_gas_costs},
+which lists the gas costs associated with varying
+the number of Halley iterations;
+the \texttt{Newton3} initialization is used,
+although there is no return logic.
+Each Halley iteration costs 135 gas,
+although the difference between $0$ and $1$ Halley iteration is $138$ gas.
+These tests used the value $3\cdot2^{160}$
+(so there is no overflow during the computation).
+
+Thus, even though fewer Halley iterations are required
+to get to the same level of accuracy,
+each Halley iteration is almost three times more expensive
+than a Newton iteration.
+
+\subsubsection{Binary Search Iteration}
+\label{app_gas_costs:binary_search}
+
+We look at the data in Table~\ref{table:binary_iteration_gas_costs},
+which lists the gas costs associated with varying
+the number of iterations within Binary search.
+The computation is more complicated because getting a different
+number of iterations requires numbers with different bit lengths,
+so a valid comparison should also compute (or estimate) the initialization
+cost (or rather, the initialization cost \emph{difference}).
+In looking at the data, we estimate that each binary iteration
+costs 115 gas.
+This is more than twice as expensive as an unrolled Newton iteration
+and still more expensive than a Newton iteration within a \texttt{while} loop.
+
+\subsubsection{Interpolation Search Iteration}
+\label{app_gas_costs:interpolation_search}
+
+We look at the data in Table~\ref{table:interpolation_iteration_gas_costs},
+which lists the gas costs associated with varying
+the number of iterations within Interpolation search.
+Each iteration costs 300 gas,
+so this method is not competitive.

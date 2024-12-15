@@ -1,0 +1,19 @@
+\section{Generic Algorithm Based on Newton's Method}
+
+One method for computing integer square roots is based
+on Newton's method;
+see~\cite[Algorithm 1.7.1]{cohen1993},
+\cite[Algorithm 9.2.11]{PrimeNumbersACP2005},
+and \cite[Algorithm 1.13]{ModernComputerArithmetic051}.
+While not the only method for computing integer square roots,
+the efficiency of Newton's method causes us to focus on these algorithms;
+additional algorithms are discussed in
+Appendix~\ref{app:algs_optimizations}.
+These algorithms usually come with a proof of correctness.
+For completeness, we reproduce~\cite[Algorithm~1.7.1]{cohen1993}
+in Algorithm~\ref{alg:cohen_isqrt},
+and include a modified version of the
+proof~\cite[Algorithm~1.7.1, Proof]{cohen1993}
+in Appendix~\ref{proof:general_newton}.
+
+\input{algs/cohen_isqrt.tex}

@@ -1,7 +1,7 @@
 \section{Comparison of Gas Costs}
 \label{sec:comparison}
 
-Because all operations are performed within the Ethereum Virtual Machine,
+Because all operations are performed within the EVM,
 the primary cost metric is the overall gas cost.
 Thus, the focus is on minimizing the total gas used.
 Ideally, the best algorithm will have the lowest maximum, mean, and median
@@ -14,6 +14,11 @@ second, we ensure that all input values are unique
 (certain values may have been double counted);
 third, different input values were chosen.
 
+After analyzing the per-call gas cost distribution,
+we discuss the associated costs of deploying the algorithm
+to the Ethereum blockchain.
+
+
 \subsection{Data Point Selection}
 
 Any gas cost comparison requires the selection of \texttt{uint256}
@@ -21,10 +26,10 @@ values for input.
 The values were chosen in this way:
 
 \begin{itemize}
-\item all numbers of the form $2^{k}$, $2^{k}-1$, and $2^{k}+1$
-    for nonnegative values of $k$;
+\item all numbers of the form $2^{k}-1$, $2^{k}$, and $2^{k}+1$
+    for positive values of $k$;
 \item $v-1$, $v$, and $v+1$ for $v = (2^{128}-1)^{2}$
-    (these were chosen because of an edge case in the new algorithms);
+    (these were chosen because of an edge case in an algorithm);
 \item random values chosen according to the
     loguniform distribution~\cite{ScipyLoguniform}
     on $\brackets{1, 2^{256}}$ when the random seed
@@ -50,6 +55,7 @@ this is, of course, not a proof that
 \prb{}, \OpenZeppelin{}, and \abdk{} are correct,
 but rather that there are no known values where these algorithms fail.
 
+
 \subsection{Summary Statistics}
 
 \input{tables/gas_costs_1.tex}
@@ -60,9 +66,12 @@ A listing of the summary statistics describing the runs
 may be found in Tables~\ref{table:gas_costs_1},
 \ref{table:gas_costs_2}, and \ref{table:gas_costs_3}.
 From here, we see that the algorithm with the smallest
-maximum gas cost is \Linear{} while
-the smallest mean and median gas costs is \UnrolledThree{}.
-The standard deviations of \Linear{} and \UnrolledThree{} are reasonable.
+mean, median, and maximum gas cost is \UnrolledThree{};
+the standard deviation of \UnrolledThree{} is minimal as well.
+\Linear{} finishes in a close second place.
+The fact that \OpenZeppelinTwo{} comes in third is not surprising
+given that it is based on \UnrolledThree{}.
+
 
 \subsection{Detailed Analysis}
 
@@ -78,18 +87,55 @@ were minimal in Figure~\ref{fig:minimal_gas_hist}.
 There does not appear to be a particular pattern
 in the value distribution.
 The main trend is that \UnrolledThree{}
-consistently performs well across the range of arguments;
-\Linear{} performs well, too.
+consistently performs well across the range of arguments.
 The only region where this does not hold is for small arguments,
 where other algorithms (\while{}) performed better;
 this makes sense because those values require fewer Newton iterations.
 
-Overall, \UnrolledThree{} has the lowest overall cost
-for a plurality of points (and close to lowest gas cost),
+Overall, \UnrolledThree{} has the lowest cost
+for a majority of points,
 so we declare this to be the algorithm of choice.
-A more extensive analysis may be found in
-Appendix~\ref{app:extended};
-the results are similar.
+A more extensive analysis (with similar results) may be found in
+Appendix~\ref{app:extended}.
 
 \input{tables/minimal_gas.tex}
 \input{plots/minimal_hist_plots.tex}
+
+
+\subsection{Deployment Gas Cost}
+
+While the primary design criterion is provably-correct algorithm
+with efficient operation,
+it is important to recognize the initial (one-time) cost
+of \emph{deploying} the algorithm to the Ethereum blockchain.
+
+The deployment cost is related to the Ethereum bytecode;
+this is the compiled version of the algorithm
+which runs on the Ethereum Virtual Machine.
+The cost depends on both the size of the bytecode
+along with the specific instructions
+(different instructions have different gas costs).
+
+In Tables~\ref{table:gas_costs_1}, \ref{table:gas_costs_2},
+and \ref{table:gas_costs_3},
+we include the absolute and relative deployment costs:
+the absolute deployment cost is the gas cost given
+by the Hardhat Solidity compiler
+(using Solidity version \texttt{0.8.20}
+and the optimizer enabled for \texttt{1000000} runs)~\cite{hardhat};
+the relative deployment cost is obtained by subtracting
+the deployment cost of an empty smart contract
+(182151~gas).
+We highlight algorithms with relative deployment cost below 95000~gas;
+this value was chosen somewhat arbitrarily
+but makes it easier to distinguish algorithms
+by deployment cost.
+
+Because the cost of deployment is a one-time cost,
+the data here is included to provide a larger picture.
+The expectation is that minimizing the per-operation cost
+is more important than a minimal deployment cost.
+Thus, even though \UnrolledThree{} has a slightly larger deployment cost
+than \OpenZeppelinTwo{},
+it is still thought that \UnrolledThree{} will result
+in an overall lower cost.

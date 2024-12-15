@@ -18,11 +18,14 @@
 \usepackage{listings}
 \usepackage{sty/lstlang0}
 \usepackage[linktocpage]{hyperref}
+\definecolor{darkgreen}{rgb}{0,0.4,0}
 \hypersetup{
     colorlinks,
-    citecolor=black,
+    citecolor=darkgreen,
     filecolor=black,
     linkcolor=blue,
-    urlcolor=blue
+    urlcolor=magenta,
+    breaklinks=true
 }
-\usepackage[sortcites=true]{biblatex}
+\usepackage{orcidlink} % relies on hyperref; must be loaded after
+\usepackage[sortcites=true,backref]{biblatex}

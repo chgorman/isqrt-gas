@@ -1,21 +1,28 @@
 \begin{table}[p]
 \centering
 \begin{tabular}{|c|
-    |S[table-format=3.0]|S[table-format=3.0]
-    |S[table-format=3.0]|S[table-format=3.0]
-    |S[table-format=3.0]|}
+    |S[table-format=6.0]|S[table-format=6.0]
+    |S[table-format=6.0]|S[table-format=6.0]
+    |S[table-format=6.0]|}
 \hline
   & \BitLength{} & \cellcolor{yellow!15} \Linear{} &
     \HyperFour{} & \LookupFour{} & \LookupEight{} \\
 \hline
-    Max    & 841 & \cellcolor{yellow!15} 812 & 845 & 922 & 925 \\
-    Mean   & 768 &                       746 & 778 & 855 & 858 \\
-    Median & 770 &                       751 & 784 & 861 & 864 \\
-    Std    &  38 &                        37 &  38 &  41 &  41 \\
+Max      &    833 & \cellcolor{yellow!15}    796 &    826 &    903 &    906 \\
+Mean     &    762 & \cellcolor{yellow!15}    739 &    769 &    846 &    849 \\
+Median   &    762 & \cellcolor{yellow!15}    739 &    769 &    846 &    849 \\
+Std      &     30 & \cellcolor{yellow!15}     28 &     29 &     30 &     30 \\
+\hline
+Abs Cost & 282605 & \cellcolor{yellow!15} 276105 & 280407 & 301301 & 349214 \\
+Rel Cost & 100454 & \cellcolor{yellow!15}  93954 &  98256 & 119150 & 167063 \\
 \hline
 \end{tabular}
 \caption[Gas Costs Statistics 3]{Here are statistics
-    related to the gas cost data.
+    related to the gas cost data;
+    we also include the absolute deployment gas cost and
+    relative deployment gas cost
+    (absolute gas cost less 182151 gas,
+    the deployment cost of an empty smart contract).
     All of these algorithms are provably correct.
     These results are for the tests in Section~\ref{sec:comparison}.
     }

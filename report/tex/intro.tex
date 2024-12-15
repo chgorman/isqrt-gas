@@ -1,10 +1,13 @@
 \section{Introduction}
 
+Basic integer arithmetic and bit operations are included
+within the Ethereum blockchain~\cite{EthereumYellowpaper};
+all other functions must be derived from those simple operations.
 We will look at various algorithms for computing integer square roots
-in Solidity and compare their efficiency (gas cost).
+on the Ethereum blockchain
+(using the Solidity programming language~\cite{SolidityLanguage})
+and compare their efficiency.
 This work extends~\cite{EfficientIsqrt}
-by adding more candidate algorithms and improving the analysis.
-Although the emphasis will be on efficiency and implementation details,
-we will also note when algorithms are \emph{provably correct},
-which is important for such a fundamental operation.
+by adding candidate algorithms and improving the analysis.
+The emphasis is on \emph{provably correct} algorithms which are efficient.
 A version of these results may be found online~\cite{IsqrtRepo}.

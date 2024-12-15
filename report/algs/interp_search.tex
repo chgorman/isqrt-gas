@@ -1,0 +1,28 @@
+\begin{algorithm}[t]
+\caption{Generic Interpolation Search
+    from~\cite[Page 41]{gonnet1980algorithmic} (modified)}
+\label{alg:interp_search}
+\begin{algorithmic}[1]
+\Require \textsf{array} is a sorted array of values;
+    $\vphi(\alpha, n)$ is the probe position to inspect.
+\Procedure{InterpolationSearch}{$\alpha$}
+    \State $\textsf{low} \algAssign{} 0$
+    \State $\textsf{high} \algAssign{} n+1$
+    \While{$\textsf{high} - \textsf{low} > 1$}
+        \State $j \algAssign{}
+            \vphi((\alpha-\textsf{array}[\textsf{low}])/
+                (\textsf{array}[\textsf{high}]-
+                \textsf{array}[\textsf{low}]), 
+                \textsf{high}-\textsf{low}-1) + \textsf{low}$
+        \If {$\alpha = \textsf{array}[j]$}
+            \State \Return $j$
+        \ElsIf {$\alpha < \textsf{array}[j]$}
+            \State $\textsf{high} \algAssign{} j$
+        \Else
+            \State $\textsf{low} \algAssign{} j$
+        \EndIf
+    \EndWhile
+    \State \Return $\textsf{fail}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

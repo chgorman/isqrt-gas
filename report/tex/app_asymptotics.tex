@@ -1,0 +1,192 @@
+\section{Asymptotic Analysis}
+\label{app:asymptotics}
+
+We investigate the asymptotic error estimates
+of computing square roots.
+We focus on determining the number of iterations required
+based on Newton's method and its generalizations.
+
+
+\subsection{Error Estimates Based on Newton's Method}
+\label{app_asymptotics:error_newton}
+
+From \cite[Chapter 3, Exercise 16]{BabyRudin},
+we recall that Newton's method for computing square roots
+has the form
+
+\begin{equation}
+    x_{k+1} \algAssign{} \frac{1}{2}\parens{x_{k} + \frac{\alpha}{x_{k}}}
+\end{equation}
+
+\noindent
+and that if
+
+\begin{align}
+    f_{\alpha}(t) &\algAssign{} \frac{1}{2}\parens{t + \frac{\alpha}{t}}
+        \nonumber\\
+    \eps &\algAssign{} t - \sqrt{\alpha}
+\end{align}
+
+\noindent
+then we have
+
+\begin{equation}
+    f_{\alpha}(t) - \sqrt{\alpha} = \frac{\eps^{2}}{2t}.
+\end{equation}
+
+We are particularly interested in asymptotic error bounds
+in order to determine the maximum required number of Newton iterations.
+To do this, we assume
+
+\begin{equation}
+    2^{e-1} \le \sqrt{\alpha} < 2^{e}
+\end{equation}
+
+\noindent
+and
+
+\begin{equation}
+    \abs{\eps_{0}} \le 2^{e-b_{0}}.
+\end{equation}
+
+\noindent
+This initial error bound allows us to compute
+
+\begin{equation}
+    \abs{\eps_{1}} \le 2^{e-2b_{0}}.
+\end{equation}
+
+\noindent
+Iterating the error bound, we see that
+
+\begin{equation}
+    \abs{\eps_{k}} \le 2^{e-2^{k}b_{0}}.
+    \label{eq:app_asymptotic_newton_quadratic}
+\end{equation}
+
+\noindent
+The error decay rate in Eq.~\eqref{eq:app_asymptotic_newton_quadratic}
+is called \emph{quadratic convergence}:
+the number of correct digits approximately \emph{doubles}
+every iteration.
+
+We want to find $k$ such that
+
+\begin{equation}
+    \abs{\eps_{k}} \le 1,
+\end{equation}
+
+\noindent
+and this is ensured when
+
+\begin{equation}
+    2^{e-2^{k}b_{0}} \le 1.
+\end{equation}
+
+\noindent
+For this value of $k$, we have
+
+\begin{equation}
+    1 < 2^{e-2^{k-1}b_{0}}.
+\end{equation}
+
+\noindent
+Rearranging, we find
+
+\begin{equation}
+    k < \lg e - \lg b_{0} + 1
+\end{equation}
+
+\noindent
+and can be approximated as
+
+\begin{equation}
+    k \simeq \lg\lg \sqrt{\alpha}.
+\end{equation}
+
+
+\subsection{Error Estimates Based on Halley's Method}
+\label{app_asymptotics:error_halley}
+
+The quadratic convergence (doubling of correct digits
+approximately every iteration) makes Newton's method very popular.
+This lead to the development of higher-order methods.
+In particular, Halley's method has \emph{cubic convergence}:
+the number of correct digits approximately \emph{triples}
+every iteration.
+This faster convergence comes at the cost of more expensive iterations.
+
+Halley's method for computing square roots~\cite[Section 2]{guo2010newton}
+has the form
+
+\begin{equation}
+    x_{k+1} = \frac{x_{k}^{3} + 3\alpha x_{k}}{3x_{k}^{2} + \alpha}
+\end{equation}
+
+\noindent
+and that if
+
+\begin{align}
+    h_{\alpha}(t) &\algAssign{} \frac{t^{3} + 3\alpha t}{3t^{2} + \alpha}
+        \nonumber\\
+    \eps &\algAssign{} t - \sqrt{\alpha},
+\end{align}
+
+\noindent
+then we have
+
+\begin{equation}
+    h_{\alpha}(t) - \sqrt{\alpha}= \frac{\eps^{3}}{3t^{2} + \alpha}.
+\end{equation}
+
+Follow the same procedure from Appendix~\ref{app_asymptotics:error_newton},
+we find $k$ such that
+
+\begin{equation}
+    0 \le \eps_{k} \le 2^{e-3^{k}b_{0}} \le 1.
+\end{equation}
+
+\noindent
+This leads to
+
+\begin{equation}
+    1 <  2^{e-3^{k-1}b_{0}}
+\end{equation}
+
+\noindent
+and reduces to
+
+\begin{equation}
+    k < \frac{1}{\lg 3}\lg e - \frac{1}{\lg 3}\lg b_{0} + 1.
+\end{equation}
+
+\noindent
+After noting $(\lg 3)^{-1}\simeq 0.63$, we see
+
+\begin{equation}
+    k \simeq 0.63\lg\lg \sqrt{\alpha}.
+\end{equation}
+
+\noindent
+This leads to an asymptotic reduction in the required number of iteration steps
+at a greater per-iteration cost.
+
+While Halley's method is better asymptotically,
+we see in Appendix~\ref{app_additional_algs:halley}
+that this method is not competitive against Newton's method
+for the values of interest (\texttt{uint256}).
+
+
+\subsection{Higher-order Iterative Methods}
+
+Higher-order generalizations are possible,
+but we do not pursue them here.
+The fact that Halley's method is not competitive with Newton's method
+in the region of interest suggests
+that better \emph{practical} algorithms will not come from
+faster \emph{asymptotic} methods.
+Furthermore, we note that deriving Newton's method for square roots
+involves computing the first derivative of $f(t) = t^{2} - \alpha$
+while Halley's method requires computing the second derivative of $f(t)$.
+Given that $f^{(\ell)}(t) = 0$ for $\ell\ge3$,
+the author expects higher order methods will not converge faster than Halley.

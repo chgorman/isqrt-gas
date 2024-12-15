@@ -1,23 +1,30 @@
 \begin{table}[p]
 \centering
 \begin{tabular}{|c|
-    |S[table-format=3.0]|S[table-format=3.0]
-    |S[table-format=3.0]|S[table-format=4.0]
-    |S[table-format=4.0]|S[table-format=4.0]|}
+    |S[table-format=6.0]|S[table-format=6.0]
+    |S[table-format=6.0]|S[table-format=6.0]
+    |S[table-format=6.0]|S[table-format=6.0]|}
 \hline
     & \UnrolledOne{} & \UnrolledTwo{} &
-    \cellcolor{yellow!15} \UnrolledThree{} &
+    \cellcolor{yellow!25} \UnrolledThree{} &
     \WhileOne{} & \WhileTwo{} & \WhileThree{} \\
 \hline
-Max    & 845 & 838 &                       817 & 1202 & 1154 & 1132 \\
-Mean   & 769 & 768 & \cellcolor{yellow!15} 742 &  817 &  873 &  833 \\
-Median & 773 & 773 & \cellcolor{yellow!15} 745 &  860 &  909 &  856 \\
-Std    &  41 &  40 &                        40 &  175 &  155 &  135 \\
+Max      &    837 &    837 & \cellcolor{yellow!25}    790 &                         1200 &                         1152 &                         1130 \\
+Mean     &    762 &    762 & \cellcolor{yellow!25}    730 &                          815 &                          872 &                          831 \\
+Median   &    765 &    765 & \cellcolor{yellow!25}    730 &                          858 &                          907 &                          854 \\
+Std      &     33 &     33 & \cellcolor{yellow!25}     28 &                          176 &                          155 &                          135 \\
+\hline
+Abs Cost & 283589 & 283601 & \cellcolor{yellow!15} 276117 & \cellcolor{yellow!15} 252678 & \cellcolor{yellow!15} 247488 & \cellcolor{yellow!15} 254192 \\
+Rel Cost & 101438 & 101450 & \cellcolor{yellow!15}  93966 & \cellcolor{yellow!15}  70527 & \cellcolor{yellow!15}  65337 & \cellcolor{yellow!15}  72041 \\
 \hline
 \end{tabular}
 \caption[Gas Costs Statistics 2]{Here are statistics
     related to the gas cost data;
-    all of these algorithms are provably correct.
+    we also include the absolute deployment gas cost and
+    relative deployment gas cost
+    (absolute gas cost less 182151 gas,
+    the deployment cost of an empty smart contract).
+    All of these algorithms are provably correct.
     These results are for the tests in Section~\ref{sec:comparison}.
     }
 \label{table:gas_costs_2}

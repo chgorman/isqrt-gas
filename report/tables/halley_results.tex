@@ -1,0 +1,21 @@
+\begin{table}[pt]
+\centering
+\begin{tabular}{|c|S[table-format=3.0]|}
+\hline
+Method & Gas \\
+\hline
+Halley's Method  & 952 \\
+\UnrolledThree{} & 705 \\
+\hline
+\end{tabular}
+\caption[Halley's Method Gas Costs]{Here we
+    compare running Halley's method from
+    Listing~\ref{list:halley-unrolled-3}
+    with \UnrolledThree{} (Listing~\ref{list:newton-unrolled-3});
+    the value $3\cdot2^{160}$ was used.
+    Even if it were possible to remove one Halley iteration,
+    the total gas would only decrease from 952 to 817
+    (which is still more expensive).
+    }
+\label{table:halleys_method_results}
+\end{table}

@@ -2,7 +2,6 @@
 function sqrt(uint256 x) internal pure returns (uint256) {
     unchecked {
         if (x <= 1) { return x; }
-        if (x >= ((1 << 128) - 1)**2) { return (1 << 128) - 1; }
 
         // Here, e represents the "approximate" bit length
         uint256 e = 1;
@@ -32,7 +31,7 @@ function sqrt(uint256 x) internal pure returns (uint256) {
         result = (result + x / result) >> 1;
         result >>= e;
 
-        if (result * result <= x) {
+        if (result <= x/result) {
             return result;
         }
         return result-1;

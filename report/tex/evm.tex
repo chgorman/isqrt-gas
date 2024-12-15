@@ -1,0 +1,30 @@
+\section{Ethereum and the Ethereum Virtual Machine}
+
+Ethereum is a blockchain designed to have the ability
+to perform arbitrary computations~\cite{EthereumYellowpaper}.
+The Ethereum Virtual Machine (EVM) executes all transactions on Ethereum.
+While Turing-complete,
+all operations cost a certain amount of \emph{gas}
+and there is a limit to the amount of gas included within each block.
+Thus, the efficiency of all operations on Ethereum
+are measured by their gas usage.
+
+The fundamental type is a \texttt{uint256} object:
+a 256-bit unsigned integer.
+Table~\ref{table:evm_gas} lists the costs of various
+integer and bit operations within the EVM.
+The fact that basic integer and bit operations are around 5 gas
+while every transaction has a base cost of $21\cdot10^{3}$ gas
+means that integer and bit operations are inexpensive.
+The fact that clean (dirty) writes costs $20\cdot10^{3}$ ($5\cdot10^{3}$) gas
+means that storing data on Ethereum is significantly more expensive;
+thus, it is beneficial to minimize storage.
+Another notable feature is that multiplication and division
+have the same cost;
+this fact is nontrivial,
+and we note the following from a paper on computing integer square roots:
+``The absence of division primitives is the main reason why we look
+for an approximation of the inverse square root rather than the
+square root itself''~\cite[Section 2]{FormalVerIsqrt}.
+
+\input{tables/evm_gas.tex}

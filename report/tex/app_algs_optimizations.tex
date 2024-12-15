@@ -1,0 +1,291 @@
+\section{Additional Algorithms and Further Optimizations}
+\label{app:algs_optimizations}
+
+We now investigate methods for potential improvements.
+We start by looking at improvements in initialization
+before turning to general methods.
+We include results from standard tests from Section~\ref{sec:comparison}
+in Table~\ref{table:gas_costs_additional},
+but none of the additional algorithms are competitive.
+
+\input{tables/gas_costs_additional.tex}
+
+
+\subsection{Additional Initializations}
+\label{app:algs_opt_init}
+
+\emph{Ceteris paribus},
+a more accurate initialization will require fewer Newton iterations
+than a less accurate initialization,
+so we begin by discussing initialization improvements.
+
+\subsubsection{Polynomial Approximations}
+\label{app:algs_opt_polynomial}
+
+The results of \Linear{} in Table~\ref{table:gas_costs_3}
+shows that a linear (affine) approximation provides
+a good initial approximation
+by providing essentially 4 correct bits.
+It is possible to extend the approximation
+to higher degree polynomials;
+however, the results in Appendix~\ref{app_gas_costs:initializations}
+suggest the gas required to get a more accurate initialization
+will cost more than the potential savings in reduced Newton iterations
+(48 gas per iteration as noted in Appendix~\ref{app_gas_costs:newton}).
+
+Specifically, \UnrolledThree{}, with an initial accuracy of 2 bits,
+requires 6 Newton iterations;
+the results in Tables~\ref{table:gas_costs_2} and \ref{table:gas_costs_3}
+show that \Linear{}, with an initial accuracy of 4 bits,
+requires 5 Newton iterations but ends up being about 10 gas more expensive.
+In Table~\ref{table:initialzation_gas_costs},
+we see the initialization of \HyperFour{} costs 46 more gas than \Linear{}.
+To reduce the number of Newton iterations to 4
+would require than the initialization would be able to use
+more gas than \Linear{} but less than \HyperFour{};
+the author is not convinced this is possible.
+
+\subsubsection{Rational Approximations}
+\label{app:algs_opt_rational}
+
+The results \HyperFour{} in Table~\ref{table:gas_costs_3}
+shows that hyperbolas provide a good initial approximation;
+however, \HyperFour{} is not more efficient than \UnrolledThree{}
+or \Linear{}.
+The discussion in Appendix~\ref{app:algs_opt_polynomial} is worth reiterating:
+Newton iterations are cheap and good approximations are expensive.
+It seems unlikely that a rational function which gives 8 bits of accuracy
+will result in a lower overall gas cost.
+
+\subsubsection{Lookup Tables}
+\label{app:algs_opt_lookup}
+
+The results in Table~\ref{table:gas_costs_3}
+show \LookupFour{} and \LookupEight{} produce decent results;
+however, the gas costs are essentially the same even though \LookupEight{}
+uses one fewer Newton iteration than \LookupFour{}.
+This leads us to expect that higher precision
+lookup tables (which would be ``\texttt{Lookup16}'')
+will not result in lower gas costs
+(not withstanding the cost of \emph{storing} all the approximations,
+which would require a \emph{much larger} deployment cost).
+Furthermore, in Table~\ref{table:initialzation_gas_costs}
+we see \LookupFour{} and \LookupEight{} have
+the most expensive initialization costs.
+
+
+\subsection{Integer Square Roots via Inverse Square Roots}
+
+In~\cite{FormalVerIsqrt}, the method for computing integer square roots
+is actually based around computing \emph{inverse square roots}.
+We note, though, that the setting and constraints are different
+as~\cite{FormalVerIsqrt} focuses on the inverse square root algorithm
+in order to not have to perform division.
+As noted in Table~\ref{table:evm_gas},
+within the Ethereum Virtual Machine
+the cost of integer multiplication and division is the same.
+Thus, although it would be an interesting exercise
+to implement the algorithm in Solidity,
+the author does not expect it to produce an efficient algorithm
+(that is, better than \UnrolledThree{}).
+
+
+\subsection{Approximate Square Roots}
+
+One method based on \emph{approximate square roots}
+may be found in \cite{PythonIsqrt}.
+The algorithm is designated as
+\python{} (Listing~\ref{list:python-isqrt});
+this algorithm was previously presented in~\cite{EfficientIsqrt}.
+The algorithm is provably correct
+but is not as efficient as the other Newton-based methods;
+see the results in Table~\ref{table:gas_costs_additional}.
+
+\input{code/python_isqrt.tex}
+
+
+\subsection{Halley's Method and Higher-Order Approximations}
+\label{app_additional_algs:halley}
+
+We have primarily focused on variations of Newton's method.
+The asymptotic analysis in Appendix~\ref{app:asymptotics}
+showed that fewer Halley iterations are required
+in comparison to Newton iterations.
+Unfortunately, in Appendix~\ref{app_gas_costs:iterations}
+we saw that Halley iterations are almost three times more expensive
+than Newton iterations
+(notwithstanding implementation issues around overflow).
+
+For completeness, we include a version of Halley's method;
+see Listing~\ref{list:halley-unrolled-3}.
+This method is of limited value as the code will overflow
+when the input is too large,
+and we have not proven the return logic is valid.
+The initialization is the same as \WhileThree{},
+and this is required in order to only have to perform 4 Halley iterations;
+using the initializations of \UnrolledOne{} or \UnrolledTwo{}
+would require 5 Halley iterations.
+See Appendix~\ref{app:error_bounds:halley}
+for the proof that 4 iterations is sufficient.
+
+We include results of running Halley's method on $3\cdot2^{160}$ in
+Table~\ref{table:halleys_method_results};
+this is why the author
+does not expect higher-order approximations
+to produce practical improvements.
+
+\input{tables/halley_results.tex}
+\input{code/halley_unrolled_3.tex}
+
+
+\subsection{Search Algorithms}
+
+We turn our attention to search algorithms.
+The idea of using search algorithms comes
+from~\cite[Chapter 11-1 Integer Square Root, Binary Search]{HackersDelight}.
+At the end of the analysis,
+we will see that these methods are not competitive;
+this can be seen in the results in Table~\ref{table:gas_costs_additional}.
+
+The noncompetitive nature appears to come from the
+inherent complexity of search algorithms:
+in~\cite[Page 425, Exercise 6.2.1.22]{TAOCPv3second},
+Knuth mentions that on average $\lg\lg N$ comparisons are required
+for interpolation sort
+and that ``\emph{all} search algorithms \dots must make asymptotically
+$\lg\lg N$ comparisons, on the average'' (emphasis in original).
+The required $\lg\lg N$ comparisons would appear to translate into
+$\lg\lg N$ loop iterations,
+and each loop iteration will presumably be more complex
+than a Newton iteration within the EVM;
+in Appendix~\ref{app_gas_costs:binary_search},
+we see the per-cost of each loop within binary search is
+approximately 115 gas
+(more than twice the cost of Newton).
+This would appear to rule out all generic search algorithms
+(even if better search algorithms only required $\lg\lg N$ iterations).
+
+The paper referenced for the required $\lg\lg N$ comparisons on average
+is presumably~\cite{YaoYaoSearching},
+which the author of the present work is unable to access.
+
+\subsubsection{Binary Search}
+
+The idea of using \emph{binary search} to compute
+the integer square root comes from its inclusion
+in~\cite{HackersDelight};
+see Listing~\ref{list:binary_search_C}
+for the \texttt{C} code from~\cite{HackersDelightArchive}
+and Listing~\ref{list:binary_search}
+for the Solidity code.
+
+Looking at Listing~\ref{list:binary_search},
+we see that the initial bounds may be sufficient
+when working with the \texttt{unsigned} type (usually \texttt{uint32}).
+The \texttt{uint256} types on the EVM encourage a more accurate bounds
+in order to reduce the number of loop iterations;
+thus, we use powers-of-2 for the left and right limits.
+
+By bounding the square root and then choosing the midpoint,
+the error is halved at every iteration of the loop.
+This leads to requiring $\Theta(\lg(x))$ number of iterations;
+in particular, at most $\frac{1}{2}\lg(x)$ iterations.
+Unfortunately, this means that 128 loop iterations are required
+for the largest integer square root values we will compute,
+and this leads to the large associated gas costs.
+Thus, this method is not competitive and
+no optimization will make it competitive.
+
+\input{code/binary_search_c.tex}
+\input{code/binary_search.tex}
+
+\subsubsection{Interpolation Search}
+
+The $\Theta(\lg(x))$ number of iterations required by binary search
+significantly increases the gas cost.
+\emph{Interpolation search}~\cite{gonnet1980algorithmic}
+seeks to reduce the required number of iterations
+by using a linear approximation to update where to search next.
+It is possible to show the required iterations is $\Theta(\lg\lg(x))$,
+but this \emph{assumes a uniform search space}
+(which is not the case here).
+The results in Table~\ref{table:interpolation_iteration_gas_costs}
+show the per-iteration cost of 300 gas per loop makes not a viable choice.
+The Solidity code may be found in Listing~\ref{list:interp_search}.
+
+The general idea of interpolation search makes sense:
+you can search an ordered array more quickly (faster than binary search)
+by estimating how the values in the array change with a linear approximation.
+The problem is that we are not searching a generic array
+but looking to compute a square root,
+and we can compute the exact derivative (so no approximation is needed).
+
+An analysis of interpolation search may be found
+in~\cite{gonnet1980algorithmic},
+and Algorithm~\ref{alg:interp_search} is based on the algorithm
+from~\cite[Page 41]{gonnet1980algorithmic}.
+
+While there are more complicated search algorithms possible
+(like the
+\emph{interpolated binary search} algorithm~\cite{mohammed2021interpolated}
+which seeks to combine the best of both binary and interpolation search),
+the results here suggest that no search method
+will be competitive against Newton's method.
+
+\input{algs/interp_search.tex}
+\input{code/interp_search.tex}
+
+
+\subsection{Hardware Algorithm}
+
+We include an additional algorithm based on one
+from~\cite[Page 285]{HackersDelight};
+see Listing~\ref{list:hardware_C}
+for the \texttt{C} code from~\cite{HackersDelightArchive}
+and Listing~\ref{list:hardware} for the Solidity code.
+This is a ``hardware'' algorithm,
+and the only operations used are comparisons, bitwise-or, bit shifts,
+and subtraction.
+The 128 loop iterations, though, make this not competitive;
+see the results in Table~\ref{table:gas_costs_additional}.
+
+\input{code/hackers_hardware_c.tex}
+\input{code/hackers_hardware.tex}
+
+
+\subsection{Potential Optimizations}
+
+Based on the cost of Newton iterations (48 gas per unrolled iteration
+and 90 gas within a \texttt{while} loop;
+see Appendix~\ref{app_gas_costs:iterations}),
+reducing the number of Newton iterations only reduces the overall
+gas cost so much.
+
+\paragraph{Additional Approximations}
+As mentioned in Appendix~\ref{app:algs_opt_init},
+it is expected that polynomial estimates, rational approximations,
+and lookup tables will not lead to an overall reduction in gas.
+It is unclear where additional approximation methods would come from.
+The best algorithms presented here
+(\UnrolledThree{} (Listing~\ref{list:newton-unrolled-3})
+followed closely by \Linear{} (Listing~\ref{list:newton-linear}))
+produce 2 or 4 bits of initial precision.
+
+\paragraph{Additional Algorithms}
+We implemented algorithms based on Newton's method
+and its generalizations, search algorithms,
+and approximate square roots.
+It is unclear to the author what other methods could lead
+to a competitive algorithm.
+From the algorithms investigated here,
+the method would likely need to have quadratic convergence.
+
+\paragraph{Assembly}
+One way to reduce gas is to write all algorithms in assembly.
+This is not completely separate from algorithm development,
+as it may be the case that optimized (assembly) versions
+of algorithms have lower gas costs which result in a different ranking.
+This requires a thorough knowledge of Solidity assembly
+and the result should be audited to ensure the algorithm
+is properly implemented.
+We leave this task to the interested reader.

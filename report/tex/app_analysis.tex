@@ -6,9 +6,8 @@ it is desirable to have a more extensive analysis.
 The only algorithms tested are
 \UnrolledThree{} (Listing~\ref{list:newton-unrolled-3}),
 \WhileOne{} (Listing~\ref{list:newton-while-1}),
-\WhileTwo{} (Listing~\ref{list:newton-while-2}),
-\WhileThree{} (Listing~\ref{list:newton-while-3}), and
-\Linear{} (Listing~\ref{list:newton-linear}),
+\WhileTwo{} (Listing~\ref{list:newton-while-2}), and
+\WhileThree{} (Listing~\ref{list:newton-while-3}),
 as these performed the best:
 they had a significant number of values which were minimal.
 
@@ -19,8 +18,6 @@ are included in these tests.
 \subsection{Deterministic Tests}
 \label{app:deterministic}
 
-\subsubsection{Overview}
-
 We test additional deterministic values.
 First, we include all deterministic values from Section~\ref{sec:comparison}.
 Additional values are of the form $2^{k} + 2^{j}$ for $j,k\in\N$ and $j < k$.
@@ -28,51 +25,21 @@ The total number of values were 33154.
 The results are shown in Table~\ref{table:minimal_gas_costs_ed}
 and Figure~\ref{fig:minimal_gas_hist_ed}.
 
-The minimal values have a somewhat different trend than before:
-\UnrolledThree{}, \Linear{}, and \WhileOne{} all perform well.
-By looking at Tables~\ref{table:minimal_gas_costs_ed_no_linear} and
-\ref{table:minimal_gas_costs_ed_no_unrolled},
-we see that \UnrolledThree{} and \Linear{} ``steal''
-minimal values from each other.
-A direct comparison between \UnrolledThree{} and \Linear{}
-may be found in Table~\ref{table:minimal_gas_costs_ed_unrolled_linear},
-where \UnrolledThree{} has the majority of minimum values.
-The fact that \WhileOne{} performs the best in
+The minimal values have a different trend than before:
+\UnrolledThree{} and \WhileOne{} both perform well.
+The fact that \WhileOne{} performs the well in
 Table~\ref{table:minimal_gas_costs_ed}
-may be explained by the initialization value in this test
+could be explained by noting that the initialization value in this test
 frequently starts \emph{very close} to the correct value;
-see the discussion in Appendix~\ref{app:deterministic_detailed}.
-It is interesting that \UnrolledThree{} and \Linear{} performed
-as well as they did in this situation which favors \WhileOne{}.
+see the discussion on gas costs of \texttt{while} loops
+in Appendix~\ref{app_gas_costs:while}.
+It is interesting that \UnrolledThree{} performed
+as well as it did in this situation which favors \WhileOne{}.
 
-The results here show that it is easy to (unwittingly)
+These results show it is easy to (unwittingly)
 test values which are biased toward one particular algorithm.
 This is the reason for testing a large collection
 of random values in Appendix~\ref{app:loguniform}.
-
-\subsubsection{Detailed Look}
-\label{app:deterministic_detailed}
-
-We now take a closer look at particular values:
-we look at all values $2^{254} \le v < 2^{255}$
-and then $2^{255} \le v < 2^{256}$.
-In this instance, we are just comparing the gas cost of \UnrolledThree{}
-and \WhileOne{}.
-We expect these two collections to be characteristic
-of the remaining gas values.
-
-\paragraph{Values $2^{254} \le v < 2^{255}$}
-For \UnrolledThree{}, there are only two gas costs in this range:
-$810$ and $817$.
-\WhileOne{} starts off at a low gas cost of $572$;
-it then jumps to $662$, $752$, $842$, $932$, and $1022$.
-We estimate that each Newton iteration costs $90$ gas.
-
-\paragraph{Values $2^{255} \le v < 2^{256}$}
-For \UnrolledThree{}, the gas cost is predominantly $810$;
-there is one instance of $817$, and three values of $168$ (from early exit).
-Almost all gas cost values for \WhileOne{} are $1022$,
-with some larger values.
 
 \input{tables/minimal_gas_ed.tex}
 \input{plots/minimal_hist_plots_ed.tex}
@@ -86,25 +53,18 @@ Here, we perform the same test using more samples;
 in particular, we use $16384 = 2^{14}$ random values from 16808 samples.
 The results are shown in Table~\ref{table:minimal_gas_costs_er}
 and Figure~\ref{fig:minimal_gas_hist_er}.
-In this case, both \UnrolledThree{} and \Linear{} perform well.
-By looking at Tables~\ref{table:minimal_gas_costs_er_no_linear} and
-\ref{table:minimal_gas_costs_er_no_unrolled},
-we see that \UnrolledThree{} and \Linear{} ``steal''
-minimal values from each other.
-A direct comparison between \UnrolledThree{} and \Linear{}
-may be found in Table~\ref{table:minimal_gas_costs_er_unrolled_linear},
-where \UnrolledThree{} has the majority of minimum values.
+In this case, \UnrolledThree{} performs well.
 
 There is no significant difference between the results in 
 Tables~\ref{table:minimal_gas_costs} and \ref{table:minimal_gas_costs_er}
 or Figures~\ref{fig:minimal_gas_hist} and \ref{fig:minimal_gas_hist_er}.
-\UnrolledThree{} has a plurality of the minimal cost for random values.
+\UnrolledThree{} has a majority of the minimal cost for random values.
 
 \input{tables/minimal_gas_er.tex}
 \input{plots/minimal_hist_plots_er.tex}
 
 \subsection{Conclusion}
 
-This extended analysis gives additional insight but with the same result:
+This extended analysis gives additional insight but the same result:
 \UnrolledThree{} is the best algorithm
 for a generic \texttt{uint256} value.

@@ -12,6 +12,8 @@ artifacts
 # Ignore output files from data analysis
 data/*.csv
 data/*.pdf
+data/analysis/*.csv
+data/analysis/*.pdf
 data/extended_det/*.csv
 data/extended_det/*.pdf
 data/extended_rnd/*.csv

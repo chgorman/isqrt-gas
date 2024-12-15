@@ -1,10 +1,10 @@
 # Analysis of Integer Square Root Algorithms in Solidity
 
-This project analyzes the gas cost of various methods of computing
-integer square roots within Solidity.
-A number of algorithms are from various projects
-(with citations).
-A couple of these algorithms are new and are provably correct.
+This project analyzes the gas cost of computing
+integer square roots in Solidity.
+This includes a number of algorithms from various projects online
+(with citations);
+some of these algorithms are new and provably correct.
 
 An extended discussion of the results may be found in `report/`,
 specifically [here](./report/isqrt_analysis.pdf).
@@ -35,17 +35,26 @@ and then run each value through a number of integer square root algorithms
 while recording the total amount of gas used per function call.
 After all the gas values are computed,
 a collection of summary statistics (max, mean, median, and standard deviation)
-are computed for the entire gas distributions for each algorithm.
+are computed for each algorithm.
 From there, the individual minimum between all algorithms
 are computed for each `uint256` value.
-A number of plots are made and the results are tabulated.
+A number of plots are made and results are tabulated.
 
 All of the results are stored in `data/`.
 During the analysis, the correctness of each computed value
 (the value returned by the integer square root functions)
 is confirmed.
 
-The total time to run this analysis is approximately 3 minutes.
+The total time to run this analysis is approximately 2.5 minutes.
+Approximately 30 seconds of this is due to the UniswapV2 analysis.
+To run the "quick" standard analysis (with UniswapV2 removed),
+run
+
+```shell
+./analyze_data.sh -q
+```
+
+The time to run this analysis is approximately 2 minutes.
 
 ### Choice of Data Points
 
@@ -53,7 +62,7 @@ In order to compare the different algorithms,
 specific `uint256` values must be tested.
 The specific values were included:
 
- -  $2^{k}$, $2^{k}-1$, and $2^{k} + 1$ for integer values of $k$
+ -  $2^{k}-1$, $2^{k}$, and $2^{k} + 1$ for integer values of $k$
  -  $v-1$, $v$, and $v+1$ for $v = (2^{128}-1)^{2}$
  -  Random values according to a
     [loguniform distribution](https://en.wikipedia.org/wiki/Reciprocal_distribution)
@@ -74,15 +83,15 @@ which algorithm is most efficient.
 ### Extended Analysis
 
 Additional analysis may be performed to verify the results from the Appendix;
-only the top 5 algorithms are tested.
-The extended deterministic test takes approximately 11 minutes
+only the top 4 algorithms are tested.
+The extended deterministic test takes approximately 8 minutes
 with results stored in `data/extended_det/` and may be ran by
 
 ```shell
 ./analyze_data.sh -d
 ```
 
-The extended random test takes approximately 6 minutes
+The extended random test takes approximately 4 minutes
 with results stored in `data/extended_rnd/` and may be ran by
 
 ```shell
@@ -92,53 +101,53 @@ with results stored in `data/extended_rnd/` and may be ran by
 ### Results
 
 These two tables show the summary statistics from the algorithms tested.
-These are Tables 1, 2, and 3 from the report.
+These are Tables 2, 3, and 4 from the report.
 
-|          | UniswapV2 | PRB | OpenZeppelin | ABDK | Python |
-| :------- | --------: | --: | -----------: | ---: | -----: |
-|  Max     |  34205    | 878 |    1021      |  881 |  959   |
-|  Mean    |  17734    | 795 |     950      |  803 |  883   |
-|  Median  |  17639    | 798 |     949      |  803 |  884   |
-|  Std     |   9558    |  34 |      30      |   33 |   43   |
+|          | UniswapV2 | PRB | OpenZeppelin | ABDK | OpenZeppelinV2 |
+| :------- | --------: | --: | -----------: | ---: | -------------: |
+|  Max     |  33931    | 874 |    1015      |  877 |       823      |
+|  Mean    |  17591    | 791 |     944      |  799 |       749      |
+|  Median  |  17497    | 794 |     943      |  799 |       751      |
+|  Std     |   9482    |  34 |      30      |   33 |        35      |
 
 |          | Unrolled1 | Unrolled2 | **Unrolled3** | While1 | While2 | While3 |
 | :------- | --------: | --------: | ------------: | -----: | -----: | -----: |
-|  Max     |    845    |    838    |      817      |  1202  |  1154  |  1132  |
-|  Mean    |    769    |    768    |    **742**    |   817  |   873  |   833  |
-|  Median  |    773    |    773    |    **745**    |   860  |   909  |   856  |
-|  Std     |     41    |     40    |       40      |   175  |   155  |   135  |
+|  Max     |    837    |    837    |    **790**    |  1200  |  1152  |  1130  |
+|  Mean    |    762    |    762    |    **730**    |   815  |   872  |   831  |
+|  Median  |    765    |    765    |    **730**    |   858  |   907  |   854  |
+|  Std     |     33    |     33    |     **28**    |   176  |   155  |   135  |
 
-|          | BitLength | **Linear** | Hyper4 | Lookup4 | Lookup8 |
-| :------- | --------: | ---------: | -----: | ------: | ------: |
-|  Max     |    841    |  **812**   |  845   |   922   |   925   |
-|  Mean    |    768    |    746     |  778   |   855   |   855   |
-|  Median  |    770    |    751     |  784   |   861   |   864   |
-|  Std     |     38    |     37     |   38   |    41   |    41   |
+|          | BitLength | Linear | Hyper4 | Lookup4 | Lookup8 |
+| :------- | --------: | -----: | -----: | ------: | ------: |
+|  Max     |    833    |  796   |  826   |   903   |   906   |
+|  Mean    |    762    |  739   |  769   |   846   |   849   |
+|  Median  |    762    |  739   |  769   |   846   |   849   |
+|  Std     |     30    |   28   |   29   |    30   |    30   |
 
 These results show how many times each algorithm was minimal.
 Algorithms not included were never minimal.
-This is Table 4 from the report.
+This is Table 5 from the report.
 
-|    Total        |    2048    |
-| :-----------    |  -------:  |
-|    UniswapV2    |       2    |
-|    Python       |       5    |
-|    Unrolled1    |       5    |
-|    Unrolled2    |       5    |
-|  **Unrolled3**  |   **738**  |
-|    While1       |     383    |
-|    While2       |     189    |
-|    While3       |     294    |
-|    BitLength    |       5    |
-|    Linear       |     453    |
-|    Hyper4       |       5    |
-|    Lookup4      |       5    |
-|    Lookup8      |       5    |
+|    Total           |    2048    |
+| :----------------- |  -------:  |
+|    UniswapV2       |       2    |
+|    OpenZeppelinV2  |       2    |
+|    Unrolled1       |       2    |
+|    Unrolled2       |       2    |
+|  **Unrolled3**     |  **1188**  |
+|    While1          |     383    |
+|    While2          |     186    |
+|    While3          |     295    |
+|    BitLength       |       2    |
+|    Linear          |       2    |
+|    Hyper4          |       2    |
+|    Lookup4         |       2    |
+|    Lookup8         |       2    |
 
 This is the most efficient algorithm (Unrolled3)
 for computing integer square roots;
 it is also provably correct.
-It had the lowest mean and median gas costs and second-lowest maximum gas cost.
+It has the lowest mean, median, and maximum gas costs.
 See `report/` for more information.
 
 ```solidity
@@ -148,10 +157,6 @@ function sqrt(uint256 x) internal pure returns (uint256) {
         // Take care of easy edge cases
         if (x <= 1) {
             return x;
-        }
-        // This check ensures no overflow
-        if (x >= ((1 << 128) - 1)**2) {
-            return (1 << 128) - 1;
         }
 
         // If we have
@@ -165,36 +170,36 @@ function sqrt(uint256 x) internal pure returns (uint256) {
         // This ensures that
         //
         //      abs(sqrt(x) - result) <= 2^{e-2}.
-        uint256 xAux = x;
-        uint256 result = 1;
-        if (xAux >= (1 << 128)) {
-            xAux >>= 128;
-            result = 1 << 64;
+        uint256 result = x;
+        uint256 e = 1;
+        if (x >= (1 << 128)) {
+            result >>= 128;
+            e = 129;
         }
-        if (xAux >= (1 << 64)) {
-            xAux >>= 64;
-            result <<= 32;
+        if (result >= (1 << 64)) {
+            result >>= 64;
+            e += 64;
         }
-        if (xAux >= (1 << 32)) {
-            xAux >>= 32;
-            result <<= 16;
+        if (result >= (1 << 32)) {
+            result >>= 32;
+            e += 32;
         }
-        if (xAux >= (1 << 16)) {
-            xAux >>= 16;
-            result <<= 8;
+        if (result >= (1 << 16)) {
+            result >>= 16;
+            e += 16;
         }
-        if (xAux >= (1 << 8)) {
-            xAux >>= 8;
-            result <<= 4;
+        if (result >= (1 << 8)) {
+            result >>= 8;
+            e += 8;
         }
-        if (xAux >= (1 << 4)) {
-            xAux >>= 4;
-            result <<= 2;
+        if (result >= (1 << 4)) {
+            result >>= 4;
+            e += 4;
         }
-        if (xAux >= (1 << 2)) {
-            result <<= 1;
+        if (result >= (1 << 2)) {
+            e += 2;
         }
-        result = (3 * result) >> 1;
+        result = (3 << (e/2)) >> 1;
 
         // Perform the 6 required Newton iterations
         result = (result + x / result) >> 1;
@@ -207,7 +212,7 @@ function sqrt(uint256 x) internal pure returns (uint256) {
         // We either have
         //
         //      Isqrt(x) == result      or      Isqrt(x) == result-1.
-        if (result * result <= x) {
+        if (result <= x/result) {
             return result;
         }
         return result-1;
@@ -221,4 +226,3 @@ As noted, all **new** algorithms and all supporting code is licensed under
 [BSD Zero Clause License](https://spdx.org/licenses/0BSD.html).
 Additional algorithms and code are from other projects and
 **have different licenses**.
-

@@ -2,20 +2,19 @@
 function sqrt(uint256 x) internal pure returns (uint256) {
     unchecked {
         if (x <= 1) { return x; }
-        if (x >= ((1 << 128) - 1)**2) { return (1 << 128) - 1; }
 
-        uint256 xAux = x;
+        uint256 result = x;
 
-        uint256 result = 1;
+        uint256 e = 1;
 
-        if (xAux >= (1 << 128)) { xAux >>= 128; result = 1 << 64; }
-        if (xAux >= (1 <<  64)) { xAux >>=  64; result <<= 32; }
-        if (xAux >= (1 <<  32)) { xAux >>=  32; result <<= 16; }
-        if (xAux >= (1 <<  16)) { xAux >>=  16; result <<=  8; }
-        if (xAux >= (1 <<   8)) { xAux >>=   8; result <<=  4; }
-        if (xAux >= (1 <<   4)) { xAux >>=   4; result <<=  2; }
-        if (xAux >= (1 <<   2)) {               result <<=  1; }
-        result = (3 * result) >> 1;
+        if (x      >= (1 << 128)) { result >>= 128; e = 129; }
+        if (result >= (1 <<  64)) { result >>=  64; e += 64; }
+        if (result >= (1 <<  32)) { result >>=  32; e += 32; }
+        if (result >= (1 <<  16)) { result >>=  16; e += 16; }
+        if (result >= (1 <<   8)) { result >>=   8; e +=  8; }
+        if (result >= (1 <<   4)) { result >>=   4; e +=  4; }
+        if (result >= (1 <<   2)) {                 e +=  2; }
+        result = (3 << (e/2)) >> 1;
 
         result = (result + x / result) >> 1;
         result = (result + x / result) >> 1;
@@ -24,7 +23,7 @@ function sqrt(uint256 x) internal pure returns (uint256) {
         result = (result + x / result) >> 1;
         result = (result + x / result) >> 1;
 
-        if (result * result <= x) {
+        if (result <= x/result) {
             return result;
         }
         return result-1;

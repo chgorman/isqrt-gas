@@ -1,0 +1,34 @@
+\begin{table}[pt]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+EVM Ops & Gas \\
+\hline
+    $+,-$ & 3 \\
+    $\times,\div$ & 5 \\
+    \textsf{and}, \textsf{or}, \textsf{xor}, \textsf{not} & 3 \\
+    $<,>,=$ & 3 \\
+    $\gg,\ll$ & 3 \\
+\hline
+    Transaction & $21\cdot10^{3}$ \\
+    \textsf{sstore} (clean) & $20\cdot10^{3}$ \\
+    \textsf{sstore} (dirty) &  $5\cdot10^{3}$ \\
+    Gas Target  & $15\cdot10^{6}$ \\
+    Gas Limit   & $30\cdot10^{6}$ \\
+\hline
+\end{tabular}
+\caption[EVM Gas Costs]{Here are some
+    of the gas costs for certain integer and bit operations within the
+    Ethereum Virtual Machine~\cite{BlockSizesGasLimits,EthereumYellowpaper}.
+    ``Transaction'' is the base gas cost of each transaction.
+    ``\textsf{sstore} (clean)'' refers to writing a nonzero word
+    (32 bytes) to the blockchain;
+    ``\textsf{sstore} (dirty)'' refers to overwriting a nonzero word
+    with another nonzero word.
+    ``Gas Target'' is the target amount of gas
+    included within a single Ethereum block;
+    ``Gas Limit'' is the maximum amount of gas
+    an Ethereum block may contain.
+    }
+\label{table:evm_gas}
+\end{table}

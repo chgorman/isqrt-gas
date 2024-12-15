@@ -1,0 +1,33 @@
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|S[table-format=3.0]|}
+\hline
+Method & Gas \\
+\hline
+\texttt{Newton1}     & 424 \\
+\texttt{Newton2}     & 417 \\
+\texttt{Newton3}     & 438 \\
+\texttt{Newton1-Var} & 420 \\
+\texttt{Newton2-Var} & 424 \\
+\texttt{Newton3-Var} & 420 \\
+\BitLength{}         & 468 \\
+\Linear{}            & 454 \\
+\HyperFour{}         & 500 \\
+\LookupFour{}        & 577 \\
+\LookupEight{}       & 628 \\
+\hline
+\end{tabular}
+\caption[Initialization Gas Costs]{Here we give
+    the gas cost for initialization methods;
+    note that we ignored the initial check and did not include
+    return logic.
+    \texttt{Newton1} is used by \UnrolledOne{} and \WhileOne{};
+    \texttt{Newton2} is used by \UnrolledTwo{} and \WhileTwo{};
+    \texttt{Newton3} is used by \WhileThree{};
+    and \texttt{Newton3-Var} is used by \UnrolledThree{}.
+    The value $2^{256}-1$ was used.
+    This clearly shows that some of the more complex initialization methods
+    cost more gas.
+    }
+\label{table:initialzation_gas_costs}
+\end{table}

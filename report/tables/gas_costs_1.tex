@@ -1,22 +1,29 @@
 \begin{table}[p]
 \centering
 \begin{tabular}{|c|
-    |S[table-format=5.0]|S[table-format=3.0]
-    |S[table-format=4.0]|S[table-format=3.0]
-    |S[table-format=3.0]|}
+    |S[table-format=6.0]|S[table-format=6.0]
+    |S[table-format=6.0]|S[table-format=6.0]
+    |S[table-format=6.0]|}
 \hline
 & \Uniswap{} & \prb{} & \OpenZeppelin{} &
-    \abdk{} & \python{} \\
+    \abdk{} & \OpenZeppelinTwo{} \\
 \hline
-Max    & 34205 & 878 & 1021 & 881 & 959 \\
-Mean   & 17734 & 795 &  950 & 803 & 883 \\
-Median & 17639 & 798 &  949 & 803 & 884 \\
-Std    &  9558 &  34 &   30 &  33 &  43 \\
+Max      &                        33931 &    874 &   1015 &    877 &                          823 \\
+Mean     &                        17591 &    791 &    944 &    799 &                          749 \\
+Median   &                        17497 &    794 &    943 &    799 &                          751 \\
+Std      &                         9482 &     34 &     30 &     33 &                           35 \\
+\hline
+Abs Cost & \cellcolor{yellow!15} 226284 & 277197 & 280341 & 281321 & \cellcolor{yellow!15} 271153 \\
+Rel Cost & \cellcolor{yellow!15}  44133 &  95046 &  98190 &  99170 & \cellcolor{yellow!15}  89002 \\
 \hline
 \end{tabular}
 \caption[Gas Costs Statistics 1]{Here are statistics
-    related to the gas cost data.
-    The \Uniswap{} and \python{} algorithms are provably correct.
+    related to the gas cost data;
+    we also include the absolute deployment gas cost and
+    relative deployment gas cost
+    (absolute gas cost less 182151 gas,
+    the deployment cost of an empty smart contract).
+    The \Uniswap{} and \OpenZeppelinTwo{} algorithms are provably correct.
     These results are for the tests in Section~\ref{sec:comparison}.
     }
 \label{table:gas_costs_1}

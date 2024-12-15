@@ -1,0 +1,124 @@
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|S[table-format=3.0]|}
+\hline
+Newton Iterations & Gas \\
+\hline
+0 & 336 \\
+1 & 391 \\
+2 & 439 \\
+3 & 487 \\
+4 & 535 \\
+5 & 583 \\
+6 & 631 \\
+\hline
+\end{tabular}
+\caption[Newton Iteration Gas Costs]{Here we give
+    the gas cost for computing each Newton iteration.
+    The difference between $k$ and $k+1$ iterations is 48 gas
+    (notwithstanding the difference between $0$ and $1$,
+    which is $55$).
+    The value $3\cdot2^{160}$ was used.
+    }
+\label{table:newton_iteration_gas_costs}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|c|S[table-format=4.0]|}
+\hline
+Value & While Iterations & Gas \\
+\hline
+$2^{256} - 2^{128}$ & 1 &  612 \\
+$2^{256} - 2^{224}$ & 2 &  702 \\
+$2^{256} - 2^{240}$ & 3 &  792 \\
+$2^{256} - 2^{248}$ & 4 &  882 \\
+$2^{256} - 2^{252}$ & 5 &  972 \\
+$2^{256} - 2^{254}$ & 6 & 1062 \\
+\hline
+\end{tabular}
+\caption[While Iteration Gas Costs]{Here we give
+    the gas cost for computing each \WhileTwo{},
+    which allows us to determine the cost per \texttt{while} loop.
+    The difference between $k$ and $k+1$ iterations is 90 gas.
+    }
+\label{table:while_iteration_gas_costs}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|S[table-format=3.0]|}
+\hline
+Halley Iterations & Gas \\
+\hline
+0 & 336 \\
+1 & 474 \\
+2 & 609 \\
+3 & 744 \\
+4 & 879 \\
+\hline
+\end{tabular}
+\caption[Halley Iteration Gas Costs]{Here we give
+    the gas cost for computing each Halley iteration.
+    As we can see, the difference between $k$ and $k+1$ iterations is 135 gas
+    (notwithstanding the difference between $0$ and $1$,
+    which is $138$).
+    The value $3\cdot2^{160}$ was used.
+    }
+\label{table:halley_iteration_gas_costs}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|c|S[table-format=5.0]|S[table-format=3.0]|S[table-format=3.0]|S[table-format=2.0]|S[table-format=3.0]|}
+\hline
+Value & Binary Iterations &
+    \multicolumn{1}{c|}{Total Gas} & \multicolumn{1}{c|}{Total Diff} &
+    \multicolumn{1}{c|}{Init Gas}  & \multicolumn{1}{c|}{Init Diff}  &
+    \multicolumn{1}{c|}{Comp Diff} \\
+\hline
+$2^{ 3}$ & 2 &  595 &     & 293 &     &     \\
+$2^{ 5}$ & 3 &  729 & 134 & 311 &  18 & 116 \\
+$2^{ 7}$ & 4 &  851 & 122 & 317 &   6 & 116 \\
+$2^{ 9}$ & 5 &  960 & 109 & 311 &  -6 & 115 \\
+$2^{13}$ & 6 & 1100 & 140 & 335 &  24 & 116 \\
+$2^{15}$ & 7 & 1221 & 121 & 341 &   6 & 115 \\
+\hline
+\end{tabular}
+\caption[Binary Search Iteration Gas Costs]{Here we give
+    the gas cost for computing each iteration within Binary Search.
+    Computing the difference in iterations for binary search
+    is more involved because we must consider the difference in
+    initialization cost.
+    \textbf{Total Diff} gives the difference between the total gas
+    between $k-1$ and $k$ binary iterations;
+    \textbf{Init Diff} gives the difference in initialization cost;
+    \textbf{Comp Diff} gives the computed difference:
+    $\textbf{Comp Diff} = \textbf{Total Diff} - \textbf{Init Diff}$.
+    These results give an approximate iteration cost of 115 gas.
+    }
+\label{table:binary_iteration_gas_costs}
+\end{table}
+
+\begin{table}[p]
+\centering
+\begin{tabular}{|c|c|S[table-format=4.0]|}
+\hline
+Value & Interp Iterations & Gas \\
+\hline
+$2^{256} - 2^{128}$ & 1 &  871 \\
+$2^{256} - 2^{180}$ & 2 & 1171 \\
+$2^{256} - 2^{196}$ & 3 & 1471 \\
+$2^{256} - 2^{224}$ & 4 & 1771 \\
+$2^{256} - 2^{230}$ & 5 & 2071 \\
+$2^{256} - 2^{236}$ & 6 & 2371 \\
+\hline
+\end{tabular}
+\caption[Interpolation Search Iteration Gas Costs]{Here we give
+    the gas cost for computing each iteration within Interpolation Search,
+    which allows us to determine the cost per \texttt{while} loop.
+    The difference between $k$ and $k+1$ iterations is 300 gas.
+    }
+\label{table:interpolation_iteration_gas_costs}
+\end{table}
+

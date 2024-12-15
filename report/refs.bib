@@ -1,10 +1,12 @@
 % References
 
-@online{IsqrtRepo,
+@software{IsqrtRepo,
     title={Analysis of Integer Square Root Algorithms in Solidity},
     author={Christopher H. Gorman},
     year={2023},
     url={https://github.com/chgorman/isqrt-gas},
+    repository={https://github.com/chgorman/isqrt-gas},
+    license={0BSD},
 }
 
 @book{BabyRudin,
@@ -16,11 +18,11 @@
 }
 
 @book{CSMaster,
-  title={The Cauchy-Schwarz Master Class:
-      An Introduction to the Art of Mathematical Inequalities},
-  author={Steele, J. Michael},
-  year={2004},
-  publisher={Cambridge University Press},
+    title={The Cauchy-Schwarz Master Class:
+        An Introduction to the Art of Mathematical Inequalities},
+    author={Steele, J. Michael},
+    year={2004},
+    publisher={Cambridge University Press},
 }
 
 @book{cohen1993,
@@ -48,6 +50,46 @@
     year={2010},
 }
 
+@book{HackersDelight,
+    title={Hacker's Delight},
+    author={Henry S. {Warren Jr.}},
+    year={2013},
+    publisher={Addison-Wesley},
+    edition={2},
+}
+
+@online{HackersDelightArchive,
+    title={Hacker's Delight Integer Square Root Code},
+    author={Henry S. {Warren Jr.}},
+    year={2013},
+    url={https://web.archive.org/web/20190402153025/http://www.hackersdelight.org/hdcodetxt/isqrt.c.txt},
+    urldate={2024-03-16},
+}
+
+@book{TAOCPv3second,
+    title={The Art of Computer Programming},
+    author={Knuth, Donald Ervin},
+    volume={3},
+    year={1998},
+    edition={2},
+    publisher={Addison-Wesley}
+}
+
+@inproceedings{YaoYaoSearching,
+    author = {Andrew C. Yao and F. Francis Yao},
+    booktitle = {2013 IEEE 54th Annual Symposium on Foundations of Computer Science},
+    title = {The complexity of searching an ordered random table},
+    year = {1976},
+    volume = {},
+    issn = {0272-5428},
+    pages = {173--177},
+    doi = {10.1109/SFCS.1976.32},
+    url = {https://doi.ieeecomputersociety.org/10.1109/SFCS.1976.32},
+    publisher = {IEEE Computer Society},
+    address = {Los Alamitos, CA, USA},
+    month = {oct}
+}
+
 @online{PythonIsqrt,
     title={Python’s integer square root algorithm},
     year={2022},
@@ -65,14 +107,14 @@
 }
 
 @inproceedings{FormalVerIsqrt,
-  title={Formal Verification of a State-of-the-Art Integer Square Root},
-  author={Melquiond, Guillaume and Rieu-Helft, Rapha{\"e}l},
-  booktitle={2019 IEEE 26th Symposium on Computer Arithmetic (ARITH)},
-  pages={183--186},
-  year={2019},
-  organization={IEEE},
-  doi={https://doi.org/10.1109/ARITH.2019.00041},
-  url={https://inria.hal.science/hal-02092970/file/main.pdf},
+    title={Formal Verification of a State-of-the-Art Integer Square Root},
+    author={Melquiond, Guillaume and Rieu-Helft, Rapha{\"e}l},
+    booktitle={2019 IEEE 26th Symposium on Computer Arithmetic (ARITH)},
+    pages={183--186},
+    year={2019},
+    organization={IEEE},
+    doi={https://doi.org/10.1109/ARITH.2019.00041},
+    url={https://inria.hal.science/hal-02092970/file/main.pdf},
 }
 
 @report{EthereumYellowpaper,
@@ -100,10 +142,18 @@
     url={https://github.com/OpenZeppelin/openzeppelin-contracts/blob/6bf68a41d19f3d6e364d8c207cb7d1a9a8e542e1/contracts/utils/math/Math.sol#L220},
 }
 
+@online{open-zeppelin-v2,
+    title={Integer Square Root Algorithm in Solidity},
+    author={OpenZeppelin},
+    month={2},
+    year={2024},
+    url={https://github.com/OpenZeppelin/openzeppelin-contracts/blob/140d66fad8b3d8bf1fe793fc73d5e0a9f55f16e3/contracts/utils/math/Math.sol#L391},
+}
+
 @online{abdk-consulting,
     title={Integer Square Root Algorithm in Solidity},
     author={ABDK Consulting},
-    month={9},
+    month={10},
     year={2020},
     url={https://github.com/abdk-consulting/abdk-libraries-solidity/blob/9e69beb255e2f87d67b44047dae229ba42ee9a64/ABDKMath64x64.sol#L727},
 }
@@ -156,6 +206,22 @@
     urldate={2023-08-21},
 }
 
+@online{BlockSizesGasLimits,
+    title={On Block Sizes, Gas Limits and Scalability},
+    author={Nero\_eth},
+    url={https://ethresear.ch/t/on-block-sizes-gas-limits-and-scalability/18444},
+    urldate={2024-11-11},
+}
+
+@article{EthereumYellowpaper,
+    title={Ethereum: A Secure Decentralised Generalised Transaction Ledger},
+    author={Wood, Gavin},
+    journal={Ethereum project yellow paper},
+    year={2022},
+    note={Commit \texttt{4b05e0d}},
+    url={https://github.com/ethereum/yellowpaper}
+}
+
 @article{guo2010newton,
     title={On Newton's method and Halley's method for the principal $p$th
         root of a matrix},
@@ -167,4 +233,52 @@
     year={2010},
     publisher={Elsevier},
     doi={https://doi.org/10.1016/j.laa.2009.02.030},
+}
+
+@article{gonnet1980algorithmic,
+    title={An Algorithmic and Complexity Analysis of Interpolation Search},
+    author={Gaston H. Gonnet and Lawrence D. Rogers and J. Alan George},
+    journal={Acta Informatica},
+    volume={13},
+    pages={39--52},
+    year={1980},
+    publisher={Springer},
+    url={https://www.researchgate.net/profile/Gaston-Gonnet/publication/220197937_An_Algorithmic_and_Complexity_Analysis_of_Interpolation_Search/links/00b7d5327f9304caef000000/An-Algorithmic-and-Complexity-Analysis-of-Interpolation-Search.pdf},
+}
+
+@article{mohammed2021interpolated,
+    title={Interpolated binary search: An efficient hybrid search algorithm
+        on ordered datasets},
+    author={Mohammed, Adnan Saher and Amrahov, {\c{S}}ahin Emrah and
+        {\c{C}}elebi, Fatih V},
+    journal={Engineering Science and Technology, an International Journal},
+    volume={24},
+    number={5},
+    pages={1072--1079},
+    year={2021},
+    publisher={Elsevier},
+    url={https://www.sciencedirect.com/science/article/pii/S221509862100046X},
+}
+
+@software{hardhat,
+    author = {Nomic Foundation},
+    title = {Hardhat},
+    url = {https://hardhat.org/},
+    version = {2.16.1},
+    date = {2024-12-10},
+}
+
+@online{SolidityLanguage,
+    title={Solidity Language},
+    author={Solidity Development Team},
+    url={https://soliditylang.org/},
+    urldate={2024-12-15},
+}
+
+@online{OpenZeppelinIsqrtCommit,
+    title={Improved integer square root (\#4403)},
+    author={Hadrien Croubois and Ernesto García and Christopher H. Gorman},
+    date={2024-02-16},
+    url={https://github.com/OpenZeppelin/openzeppelin-contracts/commit/140d66fad8b3d8bf1fe793fc73d5e0a9f55f16e3},
+    urldate={2024-12-11},
 }

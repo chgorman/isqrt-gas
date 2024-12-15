@@ -1,0 +1,23 @@
+\begin{table}[pt]
+\centering
+\begin{tabular}{|c|
+    |S[table-format=3.0]|S[table-format=5.0]
+    |S[table-format=5.0]|S[table-format=5.0]|}
+\hline
+& \python{} & \multicolumn{1}{c|}{Binary Searh}
+& \multicolumn{1}{c|}{Interpolation Searh} & \multicolumn{1}{c|}{Hardware} \\
+\hline
+Max    & 957 & 15342 & 22771 & 15640 \\
+Mean   & 881 &  7846 &  6655 & 13031 \\
+Median & 882 &  7759 &  5636 & 12994 \\
+Std    &  43 &  4283 &  5274 &   653 \\
+\hline
+\end{tabular}
+\caption[Gas Costs Statistics Additional]{Here are statistics
+    related to the gas cost data.
+    All of these algorithms are provably correct,
+    but only \python{} is close to being competitive.
+    These results are for the tests in Section~\ref{sec:comparison}.
+    }
+\label{table:gas_costs_additional}
+\end{table}
