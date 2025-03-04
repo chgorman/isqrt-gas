@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: Analysis of Integer Square Root Algorithms in Solidity
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Christopher
+    family-names: Gorman
+    orcid: 'https://orcid.org/0000-0002-3710-0094'
+repository-code: 'https://github.com/chgorman/isqrt-gas'
+abstract: >-
+  Repository with algorithms for computing integer square
+  roots in the Ethereum Virtual Machine.
+keywords:
+  - Integer square root
+  - Square root
+  - Integer arithmetic
+  - Solidity
+license: 0BSD
