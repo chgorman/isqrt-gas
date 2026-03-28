@@ -1,0 +1,39 @@
+\begin{algorithm}[t]
+\caption{Integer Square Root algorithm using floating-point sqrt (further improved)}
+\label{alg:isqrt_float_3}
+\begin{algorithmic}[1]
+\Require $n$ is a positive integer
+\Procedure{IntegerSquareRoot}{$n$}
+    \If {$n \le 2^{53}$}
+    \Comment{All of these values are represented exactly using \texttt{double}}
+        \State \Return $\textsc{Int}(\textsc{Sqrt}(n))$
+    \Comment{Compute the square root as a \texttt{double} and truncate}
+    \EndIf
+    \State $f \algAssign{} \textsc{BitLength}(n)$
+    \Comment{We have $2^{f-1}\le n < 2^{f}$ and $f\ge54$}
+    \If {$f \mod 2 = 0$}
+        \State $\alpha = (f - 52)/2$
+        \State $\beta = \min\parens{\alpha, 28}$
+    \Else
+        \State $\alpha = (f - 53)/2$
+        \State $\beta = \min\parens{\alpha, 27}$
+    \EndIf
+    \State $t \algAssign{} \floor{n/2^{2\alpha+1}}$
+    \State $q \algAssign{} \floor{n/2^{2\alpha}}$
+    \Comment{Get the high bits of $n$}
+    \State $w \algAssign{} q + (1\land t)$
+    \Comment{$\land$ is bitwise AND.}
+        \label{lst:isqrt_float_3_logical_and}
+    \State $\hat{w} \algAssign{} \textsc{Int}(2^{\beta}\cdot\textsc{Sqrt}(w))+1$
+    \State $x \algAssign{} 2^{\alpha-\beta}\cdot\hat{w}$
+    \State $x \algAssign{} \floor{\parens{x + n/x}/2}$
+    \Comment{This ensures $x\ge \floor{\sqrt{n}}$}
+    \State $y \algAssign{} \floor{\parens{x + n/x}/2}$
+    \While{$x > y$}
+        \State $x \algAssign{} y$
+        \State $y \algAssign{} \floor{\parens{x + n/x}/2}$
+    \EndWhile
+    \State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

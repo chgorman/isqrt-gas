@@ -1,0 +1,31 @@
+\begin{algorithm}[t]
+\caption{Integer Square Root algorithm using floating-point sqrt}
+\label{alg:isqrt_float_1}
+\begin{algorithmic}[1]
+\Require $n$ is a positive integer
+\Procedure{IntegerSquareRoot}{$n$}
+    \If {$n \le 2^{53}$}
+    \Comment{All of these values are represented exactly using \texttt{double}}
+        \State \Return $\textsc{Int}(\textsc{Sqrt}(n))$
+    \Comment{Compute the square root as a \texttt{double} and truncate}
+    \EndIf
+    \State $f \algAssign{} \textsc{BitLength}(n)$
+    \If {$f \mod 2 = 0$}
+        \State $\alpha = (f - 52)/2$
+    \Else
+        \State $\alpha = (f - 53)/2$
+    \EndIf
+    \State $q \algAssign{} \floor{n/2^{2\alpha}}$
+    \Comment{Get the high bits of $n$}
+    \State $w \algAssign{} q + 1$
+    \State $\hat{w} \algAssign{} \textsc{Int}(\textsc{Sqrt}(w)) + 1$
+    \State $x \algAssign{} 2^{\alpha}\cdot\hat{w}$
+    \State $y \algAssign{} \floor{\parens{x + n/x}/2}$
+    \While{$x > y$}
+        \State $x \algAssign{} y$
+        \State $y \algAssign{} \floor{\parens{x + n/x}/2}$
+    \EndWhile
+    \State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

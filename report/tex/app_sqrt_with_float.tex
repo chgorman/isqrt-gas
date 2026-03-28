@@ -1,0 +1,370 @@
+\section{Integer Square Root Computation with Floating-Point Square Root}
+\label{app:isqrt_with_float_sqrt}
+
+We now investigate the problem of computing integer square roots
+with the assistance of \emph{one} floating-point square root computation.
+While this is not possible in Solidity,
+this is possible for a general computer.
+This is mentioned in~\cite[Chapter 1.7, Remarks]{cohen1993}:
+after suggesting using the largest power-of-2 strictly greater than $\sqrt{n}$
+(the initialization value associated with \UnrolledTwo{}),
+Cohen suggests that a second
+``option is to compute a single precision floating point
+approximation to the square root of $n$ and to take the ceiling of that.
+The choice between these options is machine dependent.''
+Here, we will instead use \emph{double precision}
+to obtain a more accurate initialization,
+but the idea is the same%
+\footnote{And computing capabilities have significantly increased
+since 1993 when~\cite{cohen1993} was written.}.
+
+We note that any \emph{significant} computation involving large integers
+should use a dedicated library
+such as \texttt{GMP}~\cite{gmplib} or \texttt{Flint}~\cite{flint};
+we note that \texttt{GMP}~\cite{gmplib}
+references~\cite{zimmermann:inria-00072854}.
+
+
+\subsection{Compute Assumptions}
+
+Here, we focus on the situation similar to those of the rest of this work
+where we only have integer operations
+(addition, subtraction, multiplication, and integer division (with remainder))
+while also being able to cheaply
+perform square roots in double precision%
+\footnote{Meaning, we treat square roots in double precision
+as having essentially zero cost when compared with the
+large integer operations also being performed.}.
+Floating-point computations have their own challenges
+and are worth studying;
+some references are~\cite{HighamASNA}
+and~\cite[Chapter 4.2]{taocp2}.
+The primary metric we are concerned about is minimizing the number
+of Newton iterations;
+thus, we look to minimize the initial approximation error.
+We assume that all floating-point square roots
+are correctly rounded.
+
+In double precision, the integers can be \emph{represented exactly}
+(such as $\braces{0, 1, 2, \dots, 2^{53}}$),
+while others cannot (such as $2^{53} + 1$);
+this is related to the fact that all \texttt{double}s have
+53 bits of precision%
+\footnote{While $2^{53}$ is a 54-bit integer,
+it is still represented exactly as a \texttt{double}.}.
+
+
+\subsection{Efficient Algorithms}
+
+See Algorithms~\ref{alg:isqrt_float_1}, \ref{alg:isqrt_float_2},
+and~\ref{alg:isqrt_float_3} for the implementations;
+Algorithm~\ref{alg:isqrt_float_1} follows closely the suggestion
+from~\cite[Chapter 1.7, Remarks]{cohen1993}%
+\footnote{We truncate to an integer and add one
+rather than compute the ceiling,
+but this could easily be modified and would not affect the results.},
+but Algorithms~\ref{alg:isqrt_float_2} and~\ref{alg:isqrt_float_3}
+provide more accurate initial values.
+
+\input{algs/isqrt_float_1.tex}
+\input{algs/isqrt_float_2.tex}
+\input{algs/isqrt_float_3.tex}
+
+The main idea is the same:
+compute a floating-point square root of the high-order bits of $n$
+to get an initial approximation,
+and this is done in Algorithm~\ref{alg:isqrt_float_1}.
+To obtain a more accurate initial value,
+Algorithm~\ref{alg:isqrt_float_2} scales the computed square root
+\emph{before} truncating to an integer;
+this is seen in Line~\ref{lst:isqrt_float_2_scaled_beta}.
+This is possible because of the assumption that the computed square root
+is \emph{correctly rounded}.
+Algorithm~\ref{alg:isqrt_float_3} is able to reach 52 bits of accuracy
+by the use of bitwise AND in Line~\ref{lst:isqrt_float_3_logical_and}
+when determining the value to square root.
+
+Provided the initial value $x$ satisfies $x > \floor{\sqrt{n}}$
+(which is shown to hold for
+Algorithms~\ref{alg:isqrt_float_1} and Algorithms~\ref{alg:isqrt_float_2}),
+the algorithms are provably correct (by previous work);
+because this is not necessarily the case for Algorithm~\ref{alg:isqrt_float_3},
+one additional Newton iteration is required before the \texttt{while} loop.
+
+
+\subsection{Proof of Initial Error Bound}
+
+We now prove initial error bounds;
+we focus on Algorithm~\ref{alg:isqrt_float_2} as the bound
+for Algorithm~\ref{alg:isqrt_float_1} follows when setting $\beta=0$
+while Algorithm~\ref{alg:isqrt_float_3} has only minor modifications.
+In particular, we have the bound
+
+\begin{align}
+    \abs{\sqrt{n} - x} &\le \begin{cases}
+        2^{e-52.5} + 2^{e-25-\beta} &\quad \textsc{BitLength}(n) \mod 2 = 0   \\
+        2^{e-53}   + 2^{e-25.5-\beta} &\quad \textsc{BitLength}(n) \mod 2 = 1 \\
+    \end{cases} \nonumber\\
+    &\le 2^{e-51.7}, \quad n\ge 2^{106}.
+\end{align}
+
+\noindent
+Following the work in Appendix~\ref{app:proofs},
+we are assuming $2^{e-1}\le \sqrt{n} < 2^{e}$.
+This shows that asymptotically
+Algorithm~\ref{alg:isqrt_float_2} has twice the accuracy of
+Algorithm~\ref{alg:isqrt_float_1}.
+For Algorithm~\ref{alg:isqrt_float_3}, we have the bound
+
+\begin{align}
+    \abs{\sqrt{n} - x} &\le \begin{cases}
+        2^{e-53.5} + 2^{e-25-\beta} &\quad \textsc{BitLength}(n) \mod 2 = 0   \\
+        2^{e-54}   + 2^{e-25.5-\beta} &\quad \textsc{BitLength}(n) \mod 2 = 1 \\
+    \end{cases} \nonumber\\
+    &\le 2^{e-52}, \quad n\ge 2^{106}.
+\end{align}
+
+
+\subsubsection*{Proof of Error Bound for Algorithms~\ref{alg:isqrt_float_1} and \ref{alg:isqrt_float_2}}
+
+We assume $2^{f-1} \le n < 2^{f}$ and
+include important values from the algorithm:
+
+\begin{align}
+    \alpha &\algAssign{} \begin{cases}
+        (f - 52)/2 &\quad f\mod 2 = 0 \\
+        (f - 53)/2 &\quad f\mod 2 = 1 \\
+        \end{cases}
+        \nonumber\\
+    \beta_{\max} &\algAssign{} \begin{cases}
+        28 &\quad f\mod 2 = 0 \\
+        27 &\quad f\mod 2 = 1 \\
+        \end{cases}
+        \nonumber\\
+    q &\algAssign{} \floor{\frac{n}{2^{2\alpha}}}
+        \nonumber\\
+    w &\algAssign{} q + 1
+        \nonumber\\
+    \overline{w} &\algAssign{} 2^{2\alpha}w
+        \nonumber\\
+    s &\algAssign{} \textsc{Sqrt}(w)\quad
+        \text{(\emph{computed} value of $\sqrt{w}$)}
+        \nonumber\\
+    x &\algAssign{} 2^{\alpha-\beta}\parens{\floor{2^{\beta}s} + 1}.
+\end{align}
+
+\noindent
+By construction, we have
+
+\begin{equation}
+    \sqrt{n} < \sqrt{\overline{w}}.
+    \label{app_eq:sqrt_float_initial_order}
+\end{equation}
+
+\noindent
+We will also show that $\sqrt{\overline{w}} < x$.
+Additionally, we have
+
+\begin{equation}
+    2^{25} < w \le 2^{27}.
+    \label{app_eq:sqrt_float_w_bound}
+\end{equation}
+
+To prove the bound, we focus on
+
+\begin{equation}
+    \abs{\sqrt{n} - x} \le \abs{\sqrt{n} - \sqrt{\overline{w}}}
+                         + \abs{\sqrt{\overline{w}} - x}.
+\end{equation}
+
+\noindent
+This inequality is actually equality which follows from
+Eq.~\eqref{app_eq:sqrt_float_initial_order} and the comment below
+(which will be proven).
+
+We start by focusing on the first term.
+By the Mean Value Theorem (e.g., \cite[Theorem 5.10]{BabyRudin}),
+there exists $\xi\in\brackets{v,\overline{w}}$
+such that
+
+\begin{equation}
+    \abs{\sqrt{n} - \sqrt{\overline{w}}}
+        = \frac{1}{2\sqrt{\xi}}\abs{n - \overline{w}}.
+\end{equation}
+
+\noindent
+The definition of $\overline{w}$ implies
+
+\begin{equation}
+    \abs{n - \overline{w}} \le 2^{2\alpha}.
+\end{equation}
+
+\noindent
+The assumption on $\sqrt{n}$ implies $\xi\in\brackets{2^{f-1},2^{f}}$
+so that
+
+\begin{equation}
+    \frac{1}{2\sqrt{\xi}} \le \frac{1}{\sqrt{2^{f+1}}}.
+\end{equation}
+
+\noindent
+Together, these imply
+
+\begin{equation}
+    \frac{1}{2\sqrt{\xi}}\abs{n - \overline{w}}
+        \le \begin{cases}
+            2^{e-52.5} &\quad f \mod 2 = 0 \\
+            2^{e-53}   &\quad f \mod 2 = 1 \\
+    \end{cases}.
+\end{equation}
+
+We now focus on the second term.
+First, we see
+
+\begin{equation}
+    \abs{\sqrt{\overline{w}} - x}
+        = 2^{\alpha-\beta}\abs{2^{\beta}\sqrt{w}-\parens{\floor{2^{\beta}s}+1}}.
+\end{equation}
+
+\noindent
+Because we have $s$ is the computed square root of $w$
+which is \emph{correctly rounded} in double precision
+and Eq.~\eqref{app_eq:sqrt_float_w_bound} we have
+
+\begin{equation}
+    \abs{\sqrt{w} - s} < 2^{-\beta_{\max}}.
+    \label{app_eq:sqrt_float_ws_error}
+\end{equation}
+
+\noindent
+From this it follows that
+
+\begin{equation}
+    2^{\beta_{\max}}\sqrt{w} < 2^{\beta_{\max}}s + 1.
+    \label{app_eq:sqrt_float_ws_inequality}
+\end{equation}
+
+\noindent
+From Eqs.~\eqref{app_eq:sqrt_float_ws_error}
+and~\eqref{app_eq:sqrt_float_ws_inequality}
+we also obtain
+
+\begin{equation}
+    2^{\beta}\sqrt{w} < \floor{2^{\beta}s} + 1
+\end{equation}
+
+\noindent
+and
+
+\begin{equation}
+    \abs{2^{\beta}\sqrt{w}-\parens{\floor{2^{\beta}s}+1}}
+        < 1 + 2^{\beta-\beta_{\max}} \le 2.
+\end{equation}
+
+\noindent
+This brings us to
+
+\begin{align}
+    \abs{\sqrt{\overline{w}} - x}
+        &\le 2^{\alpha-\beta+1} \nonumber\\
+        &= \begin{cases}
+            2^{e-25-\beta} &\quad f \mod 2 = 0 \\
+            2^{e-25.5-\beta} &\quad f \mod 2 = 0 \\
+        \end{cases}.
+\end{align}
+
+Together this gives the desired result:
+
+\begin{equation}
+    \abs{\sqrt{n} - x} \le \begin{cases}
+        2^{e-52.5} + 2^{e-25-\beta}   &\quad f \mod 2 = 0 \\
+        2^{e-53}   + 2^{e-25.5-\beta} &\quad f \mod 2 = 1 \\
+    \end{cases}
+\end{equation}
+
+\noindent
+When $f\ge107$ (equivalently, $n\ge2^{106}$),
+the above inequality reduces to
+
+\begin{align}
+    \abs{\sqrt{n} - x} &\le 2^{e-52.5} + 2^{e-53} \nonumber\\
+        &< 2^{e-51.7} \quad (n\ge 2^{106}).
+\end{align}
+
+\noindent
+The important part is that by using \emph{one} double precision
+square root computation an initial value can be obtained
+with at least 51.7 bits of accuracy.
+
+
+\subsubsection*{Proof of Error Bound for Algorithm~\ref{alg:isqrt_float_3}}
+
+The proof for the error bounds for Algorithm~\ref{alg:isqrt_float_3}
+is essentially the same as the one for Algorithms~\ref{alg:isqrt_float_1}
+and~\ref{alg:isqrt_float_2}.
+The only difference is the bound for $w$.
+Because we choose $w$ based on if the next bit is set or not
+(this is the bitwise AND in Line~\ref{lst:isqrt_float_3_logical_and}),
+this implies
+
+\begin{equation}
+    \abs{n - \overline{w}} \le 2^{2\alpha-1}.
+\end{equation}
+
+\noindent
+Thus, this first error term is slightly more accurate.
+Thus, we have
+
+\begin{equation}
+    \abs{\sqrt{n} - x} \le \begin{cases}
+        2^{e-53.5} + 2^{e-25-\beta}   &\quad f \mod 2 = 0 \\
+        2^{e-54}   + 2^{e-25.5-\beta} &\quad f \mod 2 = 1 \\
+    \end{cases}.
+\end{equation}
+
+\noindent
+For large values of $n$, we see
+
+\begin{align}
+    \abs{\sqrt{n} - x} &\le \begin{cases}
+        2^{e-53.5} + 2^{e-53}   &\quad f \mod 2 = 0 \\
+        2^{e-54}   + 2^{e-52.5} &\quad f \mod 2 = 1 \\
+    \end{cases} \nonumber\\
+        &< 2^{e-52} \quad (n\ge 2^{106}).
+\end{align}
+
+We have shown that it is possible to get 52 bits of accuracy
+by using \emph{one} double precision square root computation;
+given that double precision numbers have 53 bits of precision,
+this is essentially optimal%
+\footnote{It is not clear to the author how to \emph{improve}
+this error bound using just \emph{one} \textsc{Sqrt} call.
+While the author thinks a slightly more accurate approximation
+could be obtained by averaging $\sqrt{q}$ and $\sqrt{q+1}$,
+he is not going to attempt to work through those details;
+see~\footref{footnote:second-error-term}.}.
+It is important to note that the ``$+1$'' in the initialization value $x$
+does not affect the error bound for the second error term;
+the error bound remains unchanged even if it is removed%
+\footnote{\label{footnote:second-error-term}This
+would appear show that second error term
+(the accuracy of the computed square root)
+limits the initial accuracy to at most 52.5 bits
+and is the main reason why the author is not attempting further improvements.
+Even if it were possible to perform a weighted average
+of $\textsc{Sqrt}(q)$ and $\textsc{Sqrt}(q+1)$
+to obtain a better approximation,
+the author is not convinced the float-point error in the second term
+could be \emph{proven} to decrease.
+With such a possible weighted value,
+the author could see how the first error term could be reduced
+to $2^{e-55}$, but the second term would remain at $2^{e-52.5}$;
+the overall error would then reduce to $2^{e-52.26}$,
+which is a negligible improvement.},
+but including it ensures that $x > \floor{\sqrt{n}}$.
+
+The author mentions that by the time a difference between
+Algorithms~\ref{alg:isqrt_float_2} and~\ref{alg:isqrt_float_3}
+is noticed the user should have long since switched
+to more efficient algorithms from
+\texttt{GMP}~\cite{gmplib} or \texttt{Flint}~\cite{flint}.
