@@ -14,9 +14,13 @@ a 256-bit unsigned integer.
 Table~\ref{table:evm_gas} lists the costs of various
 integer and bit operations within the EVM.
 The fact that basic integer and bit operations are around 5 gas
-while every transaction has a base cost of $21\cdot10^{3}$ gas
-means that integer and bit operations are inexpensive.
-The fact that clean (dirty) writes costs $20\cdot10^{3}$ ($5\cdot10^{3}$) gas
+while every transaction has a base cost of \num{21000} gas
+means that integer and bit operations are inexpensive%
+\footnote{The recent inclusion of the \emph{count leading zeros} (\textsf{clz})
+opcode in EIP-7939 significantly reduces gas costs associated
+with initializing square roots;
+this application is specifically mentioned~\cite[Motivation]{eip7939}.}.
+The fact that clean (dirty) writes costs \num{20000} (\num{5000}) gas
 means that storing data on Ethereum is significantly more expensive;
 thus, it is beneficial to minimize storage.
 Another notable feature is that multiplication and division

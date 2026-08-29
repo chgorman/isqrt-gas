@@ -3,27 +3,27 @@
 \begin{tabular}{|c|
     |S[table-format=6.0]|S[table-format=6.0]
     |S[table-format=6.0]|S[table-format=6.0]
-    |S[table-format=6.0]|}
+    |S[table-format=6.0]|S[table-format=6.0]|}
 \hline
-& \Uniswap{} & \prb{} & \OpenZeppelin{} &
-    \abdk{} & \OpenZeppelinTwo{} \\
+& \Uniswap{} & \prb{} & \prbTwo{} & \OpenZeppelin{} & \abdk{} & \OpenZeppelinTwo{} \\
 \hline
-Max      &                        33931 &    874 &   1015 &    877 &                          823 \\
-Mean     &                        17591 &    791 &    944 &    799 &                          749 \\
-Median   &                        17497 &    794 &    943 &    799 &                          751 \\
-Std      &                         9482 &     34 &     30 &     33 &                           35 \\
+Max      &  33931 &    874 &    474 &   1015 &    877 &    823 \\
+Mean     &  17591 &    791 &    474 &    944 &    798 &    749 \\
+Median   &  17497 &    794 &    474 &    943 &    799 &    751 \\
+Std      &   9482 &     34 &      0 &     30 &     33 &     35 \\
 \hline
-Abs Cost & \cellcolor{yellow!15} 226284 & 277197 & 280341 & 281321 & \cellcolor{yellow!15} 271153 \\
-Rel Cost & \cellcolor{yellow!15}  44133 &  95046 &  98190 &  99170 & \cellcolor{yellow!15}  89002 \\
+Abs Cost & 224112 & 275009 & 216988 & 278189 & 279161 & 268989 \\
+Rel Cost &  44137 &  95034 &  37013 &  98214 &  99186 &  89014 \\
 \hline
 \end{tabular}
 \caption[Gas Costs Statistics 1]{Here are statistics
     related to the gas cost data;
     we also include the absolute deployment gas cost and
     relative deployment gas cost
-    (absolute gas cost less 182151 gas,
+    (absolute gas cost less \num{179975} gas,
     the deployment cost of an empty smart contract).
-    The \Uniswap{} and \OpenZeppelinTwo{} algorithms are provably correct.
+    The \Uniswap{}, \prbTwo{}, and \OpenZeppelinTwo{} algorithms
+    are provably correct.
     These results are for the tests in Section~\ref{sec:comparison}.
     }
 \label{table:gas_costs_1}

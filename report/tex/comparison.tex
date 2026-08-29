@@ -29,7 +29,7 @@ The values were chosen in this way:
 \item all numbers of the form $2^{k}-1$, $2^{k}$, and $2^{k}+1$
     for positive values of $k$;
 \item $v-1$, $v$, and $v+1$ for $v = (2^{128}-1)^{2}$
-    (these were chosen because of an edge case in an algorithm);
+    (these were chosen because of a previous edge case in some algorithms);
 \item random values chosen according to the
     loguniform distribution~\cite{ScipyLoguniform}
     on $\brackets{1, 2^{256}}$ when the random seed
@@ -47,8 +47,7 @@ and a total of $1303$ random samples determined
 the remaining 1280 values.
 
 In addition to measuring the gas cost,
-the result of each integer square root operation was
-validated using
+the result of each integer square root operation was validated using
 Python's integer square root~\cite{PythonIsqrt,PythonIsqrtLink}.
 There was no instance in which an algorithm ever produced an incorrect result;
 this is, of course, not a proof that 
@@ -68,9 +67,8 @@ may be found in Tables~\ref{table:gas_costs_1},
 From here, we see that the algorithm with the smallest
 mean, median, and maximum gas cost is \UnrolledThree{};
 the standard deviation of \UnrolledThree{} is minimal as well.
-\Linear{} finishes in a close second place.
-The fact that \OpenZeppelinTwo{} comes in third is not surprising
-given that it is based on \UnrolledThree{}.
+\UnrolledOne{} and \UnrolledTwo{} tied for second place
+followed by \Linear{} in fourth.
 
 
 \subsection{Detailed Analysis}
@@ -95,7 +93,7 @@ this makes sense because those values require fewer Newton iterations.
 Overall, \UnrolledThree{} has the lowest cost
 for a majority of points,
 so we declare this to be the algorithm of choice.
-A more extensive analysis (with similar results) may be found in
+An extended analysis (with similar results) may be found in
 Appendix~\ref{app:extended}.
 
 \input{tables/minimal_gas.tex}
@@ -107,35 +105,41 @@ Appendix~\ref{app:extended}.
 While the primary design criterion is provably-correct algorithm
 with efficient operation,
 it is important to recognize the initial (one-time) cost
-of \emph{deploying} the algorithm to the Ethereum blockchain.
+of \emph{deploying} the algorithm to Ethereum.
 
 The deployment cost is related to the Ethereum bytecode;
 this is the compiled version of the algorithm
 which runs on the Ethereum Virtual Machine.
-The cost depends on both the size of the bytecode
-along with the specific instructions
-(different instructions have different gas costs).
+The cost primarily depends on the size of the bytecode.
 
 In Tables~\ref{table:gas_costs_1}, \ref{table:gas_costs_2},
 and \ref{table:gas_costs_3},
 we include the absolute and relative deployment costs:
 the absolute deployment cost is the gas cost given
-by the Hardhat Solidity compiler
-(using Solidity version \texttt{0.8.20}
-and the optimizer enabled for \texttt{1000000} runs)~\cite{hardhat};
+by the Hardhat Solidity compiler~\cite{hardhat}%
+\footnote{Using Solidity version \texttt{0.8.31}
+and the optimizer enabled for \num{1000000} runs.};
 the relative deployment cost is obtained by subtracting
 the deployment cost of an empty smart contract
-(182151~gas).
-We highlight algorithms with relative deployment cost below 95000~gas;
+(\num{179975}~gas).
+We highlight algorithms with relative deployment cost below \num{20000}~gas;
 this value was chosen somewhat arbitrarily
 but makes it easier to distinguish algorithms
-by deployment cost.
+by deployment cost%
+\footnote{Using the Yul assembly language~\cite{YulLanguage}
+to write the new algorithms resulted in a \emph{significant}
+decrease in deployment cost.
+Previously, the minimal deployment cost was \Uniswap{}
+and the minimal \emph{unrolled} cost was \OpenZeppelinTwo{}
+(with roughly the same costs as shown in Table~\ref{table:gas_costs_1});
+now, essentially all of the new algorithms have smaller cost than \Uniswap{}.
+}.
 
 Because the cost of deployment is a one-time cost,
 the data here is included to provide a larger picture.
-The expectation is that minimizing the per-operation cost
-is more important than a minimal deployment cost.
-Thus, even though \UnrolledThree{} has a slightly larger deployment cost
-than \OpenZeppelinTwo{},
-it is still thought that \UnrolledThree{} will result
-in an overall lower cost.
+The results show the lowest deployment costs
+are in the order
+\WhileTwo{}, \UnrolledThree{}, \UnrolledOne{},
+and \UnrolledTwo{},
+although the cost differences are minimal.
+

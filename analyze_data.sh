@@ -60,8 +60,8 @@ elif [[ "$#" -eq 1 ]]; then
             fi
             ;;
 
-        -o) # Quick standard analysis (no UniswapV2); update file
-            echo "Standard analysis (on non-Newton algorithms)"
+        -o) # Other standard analysis (non-Newton algorithms); update file
+            echo "Other standard analysis (non-Newton algorithms)"
             echo
             SED_FILE=scripts/standard_quick.sed
             STD_BOOL=false

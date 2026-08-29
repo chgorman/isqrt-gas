@@ -29,4 +29,10 @@
     breaklinks=true
 }
 \usepackage{orcidlink} % relies on hyperref; must be loaded after
-\usepackage[sortcites=true,backref]{biblatex}
+\usepackage[
+    style=numeric,
+    backend=biber,
+    sortcites=true,
+    backref,
+    maxbibnames=99
+]{biblatex}

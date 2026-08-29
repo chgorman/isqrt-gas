@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: 0BSD
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.31;
 
 // Import this file to use console.log
 import "hardhat/console.sol";
@@ -9,571 +9,322 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 library SqrtStandard {
     ////////////////////////////////////////////////////////////////////////
     // initialization is largest power-of-2 <= isqrt(x)
-    function sqrt_newton_unrolled_1(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
-            uint256 xAux = x;
-            uint256 result = 1;
-            if (xAux >= (1 << 128)) {
-                xAux >>= 128;
-                result = 1 << 64;
-            }
-            if (xAux >= (1 << 64)) {
-                xAux >>= 64;
-                result <<= 32;
-            }
-            if (xAux >= (1 << 32)) {
-                xAux >>= 32;
-                result <<= 16;
-            }
-            if (xAux >= (1 << 16)) {
-                xAux >>= 16;
-                result <<= 8;
-            }
-            if (xAux >= (1 << 8)) {
-                xAux >>= 8;
-                result <<= 4;
-            }
-            if (xAux >= (1 << 4)) {
-                xAux >>= 4;
-                result <<= 2;
-            }
-            if (xAux >= (1 << 2)) {
-                result <<= 1;
-            }
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            if (result <= x/result) {
-                return result;
-            }
-            return result-1;
+    function sqrt_newton_unrolled_1(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            result := clz(x)
+            result := sub(255, result)
+            // If
+            //
+            //      2**(k-1) <= x < 2**k
+            //
+            // we now have
+            //
+            //      result == k-1
+
+            result := shl(shr(1, result), 1)
+            // If
+            //
+            //      2**(f-1) <= sqrt(x) < 2**f
+            //
+            // we now have
+            //
+            //      result == 2**(f-1)
+
+            // Perform the 7 required newton iterations
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+
+            result := sub(result, gt(result, div(x, result)))
         }
     }
 
     ////////////////////////////////////////////////////////////////////////
     // initialization is smallest power-of-2 > isqrt(x)
-    function sqrt_newton_unrolled_2(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
-            uint256 xAux = x;
-            uint256 result = 2;
-            if (xAux >= (1 << 128)) {
-                xAux >>= 128;
-                result = 2 << 64;
-            }
-            if (xAux >= (1 << 64)) {
-                xAux >>= 64;
-                result <<= 32;
-            }
-            if (xAux >= (1 << 32)) {
-                xAux >>= 32;
-                result <<= 16;
-            }
-            if (xAux >= (1 << 16)) {
-                xAux >>= 16;
-                result <<= 8;
-            }
-            if (xAux >= (1 << 8)) {
-                xAux >>= 8;
-                result <<= 4;
-            }
-            if (xAux >= (1 << 4)) {
-                xAux >>= 4;
-                result <<= 2;
-            }
-            if (xAux >= (1 << 2)) {
-                result <<= 1;
-            }
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            if (result <= x/result) {
-                return result;
-            }
-            return result-1;
+    function sqrt_newton_unrolled_2(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            result := clz(x)
+            result := sub(257, result)
+            // If
+            //
+            //      2**(k-1) <= x < 2**k
+            //
+            // we now have
+            //
+            //      result == k+1
+
+            result := shl(shr(1, result), 1)
+            // If
+            //
+            //      2**(f-1) <= sqrt(x) < 2**f
+            //
+            // we now have
+            //
+            //      result == 2**f
+
+            // Perform the 7 required newton iterations
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+
+            result := sub(result, gt(result, div(x, result)))
         }
     }
 
     ////////////////////////////////////////////////////////////////////////
     // Original idea but updated initialization method
     // initialize with better approximation
-    function sqrt_newton_unrolled_3(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
-            uint256 result = x;
-            uint256 e = 1;
-            if (x >= (1 << 128)) {
-                result >>= 128;
-                e = 129;
-            }
-            if (result >= (1 << 64)) {
-                result >>= 64;
-                e += 64;
-            }
-            if (result >= (1 << 32)) {
-                result >>= 32;
-                e += 32;
-            }
-            if (result >= (1 << 16)) {
-                result >>= 16;
-                e += 16;
-            }
-            if (result >= (1 << 8)) {
-                result >>= 8;
-                e += 8;
-            }
-            if (result >= (1 << 4)) {
-                result >>= 4;
-                e += 4;
-            }
-            if (result >= (1 << 2)) {
-                e += 2;
-            }
-            result = (3 << (e/2)) >> 1;
+    function sqrt_newton_unrolled_3(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            result := clz(x)
+            result := sub(255, result)
+            // If
+            //
+            //      2**(k-1) <= x < 2**k
+            //
+            // we now have
+            //
+            //      result == k-1
 
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            if (result <= x/result) {
-                return result;
-            }
-            return result-1;
+            result := shr(1, shl(shr(1, result), 3))
+            // If
+            //
+            //      2**(f-1) <= sqrt(x) < 2**f
+            //
+            // we now have
+            //
+            //      result == 2**(f-1) + 2**(f-2)
+
+            // Perform the 6 required newton iterations
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+
+            result := sub(result, gt(result, div(x, result)))
         }
     }
 
     ////////////////////////////////////////////////////////////////////////
     // while loop with init 1
     // initialization is largest power-of-2 <= isqrt(x)
-    function sqrt_newton_while_1(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
-            uint256 xAux = x;
-            uint256 result = 1;
-            if (xAux >= (1 << 128)) {
-                xAux >>= 128;
-                result = 1 << 64;
-            }
-            if (xAux >= (1 << 64)) {
-                xAux >>= 64;
-                result <<= 32;
-            }
-            if (xAux >= (1 << 32)) {
-                xAux >>= 32;
-                result <<= 16;
-            }
-            if (xAux >= (1 << 16)) {
-                xAux >>= 16;
-                result <<= 8;
-            }
-            if (xAux >= (1 << 8)) {
-                xAux >>= 8;
-                result <<= 4;
-            }
-            if (xAux >= (1 << 4)) {
-                xAux >>= 4;
-                result <<= 2;
-            }
-            if (xAux >= (1 << 2)) {
-                result <<= 1;
-            }
+    function sqrt_newton_while_1(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            result := clz(x)
+            result := sub(255, result)
+            // If
+            //
+            //      2**(k-1) <= x < 2**k
+            //
+            // we now have
+            //
+            //      result == k-1
 
-            result = (result + x / result) >> 1;
-            xAux = (result + x / result) >> 1;
-            while (xAux < result) {
-                result = xAux;
-                xAux = (result + x / result) >> 1;
+            result := shl(shr(1, result), 1)
+            // If
+            //
+            //      2**(f-1) <= sqrt(x) < 2**f
+            //
+            // we now have
+            //
+            //      result == 2**(f-1)
+
+            result := shr(1, add(result, div(x, result)))
+            let xAux := shr(1, add(result, div(x, result)))
+
+            // while loop
+            for { } lt(xAux, result) { } {
+                result := xAux
+                xAux := shr(1, add(result, div(x, result)))
             }
-            return result;
         }
     }
 
     ////////////////////////////////////////////////////////////////////////
     // while loop with init 2
     // initialization is smallest power-of-2 > isqrt(x)
-    function sqrt_newton_while_2(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
-            uint256 xAux = x;
-            uint256 result = 2;
-            if (xAux >= (1 << 128)) {
-                xAux >>= 128;
-                result = 2 << 64;
-            }
-            if (xAux >= (1 << 64)) {
-                xAux >>= 64;
-                result <<= 32;
-            }
-            if (xAux >= (1 << 32)) {
-                xAux >>= 32;
-                result <<= 16;
-            }
-            if (xAux >= (1 << 16)) {
-                xAux >>= 16;
-                result <<= 8;
-            }
-            if (xAux >= (1 << 8)) {
-                xAux >>= 8;
-                result <<= 4;
-            }
-            if (xAux >= (1 << 4)) {
-                xAux >>= 4;
-                result <<= 2;
-            }
-            if (xAux >= (1 << 2)) {
-                result <<= 1;
-            }
+    function sqrt_newton_while_2(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            result := clz(x)
+            result := sub(257, result)
+            // If
+            //
+            //      2**(k-1) <= x < 2**k
+            //
+            // we now have
+            //
+            //      result == k+1
 
-            xAux = (result + x / result) >> 1;
-            while (xAux < result) {
-                result = xAux;
-                xAux = (result + x / result) >> 1;
+            result := shl(shr(1, result), 1)
+            // If
+            //
+            //      2**(f-1) <= sqrt(x) < 2**f
+            //
+            // we now have
+            //
+            //      result == 2**f
+
+            let xAux := shr(1, add(result, div(x, result)))
+
+            // while loop
+            for { } lt(xAux, result) { } {
+                result := xAux
+                xAux := shr(1, add(result, div(x, result)))
             }
-            return result;
         }
     }
 
     ////////////////////////////////////////////////////////////////////////
     // while loop with init 3
     // initialization with better approximation
-    function sqrt_newton_while_3(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
-            uint256 xAux = x;
-            uint256 result = 1;
-            if (xAux >= (1 << 128)) {
-                xAux >>= 128;
-                result = 1 << 64;
-            }
-            if (xAux >= (1 << 64)) {
-                xAux >>= 64;
-                result <<= 32;
-            }
-            if (xAux >= (1 << 32)) {
-                xAux >>= 32;
-                result <<= 16;
-            }
-            if (xAux >= (1 << 16)) {
-                xAux >>= 16;
-                result <<= 8;
-            }
-            if (xAux >= (1 << 8)) {
-                xAux >>= 8;
-                result <<= 4;
-            }
-            if (xAux >= (1 << 4)) {
-                xAux >>= 4;
-                result <<= 2;
-            }
-            if (xAux >= (1 << 2)) {
-                result <<= 1;
-            }
-            result = (3 * result) >> 1;
+    function sqrt_newton_while_3(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            result := clz(x)
+            result := sub(255, result)
+            // If
+            //
+            //      2**(k-1) <= x < 2**k
+            //
+            // we now have
+            //
+            //      result == k-1
 
-            result = (result + x / result) >> 1;
-            xAux = (result + x / result) >> 1;
-            while (xAux < result) {
-                result = xAux;
-                xAux = (result + x / result) >> 1;
+            result := shr(1, shl(shr(1, result), 3))
+            // If
+            //
+            //      2**(f-1) <= sqrt(x) < 2**f
+            //
+            // we now have
+            //
+            //      result == 2**(f-1) + 2**(f-2)
+
+            result := shr(1, add(result, div(x, result)))
+            let xAux := shr(1, add(result, div(x, result)))
+
+            // while loop
+            for { } lt(xAux, result) { } {
+                result := xAux
+                xAux := shr(1, add(result, div(x, result)))
             }
-            return result;
         }
     }
 
     ////////////////////////////////////////////////////////////////////////
     // Use full info from bit length
-    function sqrt_newton_bitlength(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
+    function sqrt_newton_bitlength(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            result := clz(x)
+            result := sub(255, result)
+            // If
+            //
+            //      2**(k-1) <= x < 2**k
+            //
+            // we now have
+            //
+            //      result == k-1
+            //
+            // Thus, we actually are using the bitlength minus one
+
+            switch and(result, 1)
+            case 1 {
+                // bitlength is *even*
+                result := shr(4, shl(shr(1, result), 27))
+            }
+            default {
+                // bitlength is *odd*
+                result := shr(5, shl(shr(1, result), 39))
             }
 
-            // Here, result is a copy of x to compute the bit length
-            uint256 result = x;
-            // Here, e represents the (approximate) bit length;
-            // its value is at most 256, so it could fit in a uint16.
-            uint256 e = 1;
-            if (x >= (1 << 128)) {
-                result >>= 128;
-                e = 129;
-            }
-            if (result >= (1 << 64)) {
-                result >>= 64;
-                e += 64;
-            }
-            if (result >= (1 << 32)) {
-                result >>= 32;
-                e += 32;
-            }
-            if (result >= (1 << 16)) {
-                result >>= 16;
-                e += 16;
-            }
-            if (result >= (1 << 8)) {
-                result >>= 8;
-                e += 8;
-            }
-            if (result >= (1 << 4)) {
-                result >>= 4;
-                e += 4;
-            }
-            if (result >= (1 << 2)) {
-                result >>= 2;
-                e += 2;
-            }
-            // Suppose
-            //
-            //      2^(2k-2) <= x < 2^(2k)
-            //
-            // At this point, e == 2k-1.
-            // This means that
-            //
-            //      1 << (e/2) ==  2**(k-1)
-            if (result >= (1 << 1)) {
-                // normally would include
-                //
-                //      e += 1
-                //
-                // so we should really have e == 2k, so bitlength is even.
-                result = (27 << (e/2)) >> 4;
-            } else {
-                // We actually have
-                //
-                //      e == 2k-1
-                //
-                // so bitlength is odd.
-                result = (39 << (e/2)) >> 5;
-            }
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
 
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            result = (result + x / result) >> 1;
-            if (result <= x/result) {
-                return result;
-            }
-            return result-1;
+            result := sub(result, gt(result, div(x, result)))
         }
     }
 
     ////////////////////////////////////////////////////////////////////////
     // Use linear approximation
-    function sqrt_newton_linear(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
+    function sqrt_newton_linear(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            let e := clz(x)
+            e := shr(1, e)
+            let m := shl(shl(1, e), x)
 
-            // Here, result is a copy of x to compute the bit length
-            uint256 result = x;
-            // Here, e represents the bit length;
-            // its value is at most 256, so it could fit in a uint16.
-            uint256 e = 1;
-            if (x >= (1 << 128)) {
-                result >>= 128;
-                e = 129;
-            }
-            if (result >= (1 << 64)) {
-                result >>= 64;
-                e += 64;
-            }
-            if (result >= (1 << 32)) {
-                result >>= 32;
-                e += 32;
-            }
-            if (result >= (1 << 16)) {
-                result >>= 16;
-                e += 16;
-            }
-            if (result >= (1 << 8)) {
-                result >>= 8;
-                e += 8;
-            }
-            if (result >= (1 << 4)) {
-                result >>= 4;
-                e += 4;
-            }
-            if (result >= (1 << 2)) {
-                e += 2;
-            }
-            // e is currently bit length; we overwrite it to scale x
-            e = (256 - e) >> 1;
-            // m now satisfies 2**254 <= m < 2**256
-            uint256 m = x << (2 * e);
-            // result now stores the result
+            result := shr(252, m)
+            // the initial approximation
+            result := shl(123, add(14, result))
 
-            // need to initialize result
-            result = m >> 252;
-            result = (14 + result) << 123;
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(e, result)
 
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result >>= e;
-
-            if (result <= x/result) {
-                return result;
-            }
-            return result-1;
+            result := sub(result, gt(result, div(x, result)))
         }
     }
 
     ////////////////////////////////////////////////////////////////////////
     // New design
     // Uses hyperbolic approximation to get 4 bits of precision
-    function sqrt_newton_hyper_4(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
+    function sqrt_newton_hyper_4(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            let e := clz(x)
+            e := shr(1, e)
+            let m := shl(shl(1, e), x)
 
-            // Here, result is a copy of x to compute the bit length
-            uint256 result = x;
-            // Here, e represents the bit length;
-            // its value is at most 256, so it could fit in a uint16.
-            uint256 e = 1;
-            if (x >= (1 << 128)) {
-                result >>= 128;
-                e = 129;
-            }
-            if (result >= (1 << 64)) {
-                result >>= 64;
-                e += 64;
-            }
-            if (result >= (1 << 32)) {
-                result >>= 32;
-                e += 32;
-            }
-            if (result >= (1 << 16)) {
-                result >>= 16;
-                e += 16;
-            }
-            if (result >= (1 << 8)) {
-                result >>= 8;
-                e += 8;
-            }
-            if (result >= (1 << 4)) {
-                result >>= 4;
-                e += 4;
-            }
-            if (result >= (1 << 2)) {
-                e += 2;
-            }
-            // e is currently bit length; we overwrite it to scale x
-            e = (256 - e) >> 1;
-            // m now satisfies 2**254 <= m < 2**256
-            uint256 m = x << (2 * e);
-            // result now stores the result
+            result := shr(252, m)
+            // the initial approximation
+            result := shl(123, div(512, sub(31, result)))
 
-            // need to initialize result
-            result = m >> 252;
-            result = (512/(31 - result)) << 123;
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(e, result)
 
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result >>= e;
-
-            if (result <= x/result) {
-                return result;
-            }
-            return result-1;
+            result := sub(result, gt(result, div(x, result)))
         }
     }
 
     ////////////////////////////////////////////////////////////////////////
     // New design
     // Uses table lookups for 4 bits of precision
-    // First 4 bytes are zero bytes
-    bytes constant lookup_table_4 = "\x00\x00\x00\x00\x11\x13\x15\x16\x17\x19\x1a\x1b\x1c\x1d\x1e\x1f";
+    function sqrt_newton_lookup_4(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            let e := clz(x)
+            e := shr(1, e)
+            let m := shl(shl(1, e), x)
 
-    function sqrt_newton_lookup_4(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
+            // the initial approximation
+            result := shr(252, m) // get the top 4 bits for lookup
+            result := byte(result, 0x000000001113151617191a1b1c1d1e1f00000000000000000000000000000000)
+            result := shl(123, result)
 
-            // Here, result is a copy of x to compute the bit length
-            uint256 result = x;
-            // Here, e represents the bit length;
-            // its value is at most 256, so it could fit in a uint16.
-            uint256 e = 1;
-            if (x >= (1 << 128)) {
-                result >>= 128;
-                e = 129;
-            }
-            if (result >= (1 << 64)) {
-                result >>= 64;
-                e += 64;
-            }
-            if (result >= (1 << 32)) {
-                result >>= 32;
-                e += 32;
-            }
-            if (result >= (1 << 16)) {
-                result >>= 16;
-                e += 16;
-            }
-            if (result >= (1 << 8)) {
-                result >>= 8;
-                e += 8;
-            }
-            if (result >= (1 << 4)) {
-                result >>= 4;
-                e += 4;
-            }
-            if (result >= (1 << 2)) {
-                e += 2;
-            }
-            // e is currently bit length; we overwrite it to scale x
-            e = (256 - e) >> 1;
-            // m now satisfies 2**254 <= m < 2**256
-            uint256 m = x << (2 * e);
-            // result now stores the result
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(e, result)
 
-            // need to initialize result
-            result = uint256(uint8(lookup_table_4[(m >> 252)])) << 123;
-
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result >>= e;
-
-            if (result <= x/result) {
-                return result;
-            }
-            return result-1;
+            result := sub(result, gt(result, div(x, result)))
         }
     }
 
@@ -583,63 +334,31 @@ library SqrtStandard {
     // First 64 bytes are zero bytes
     bytes constant lookup_table_8 = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x03\x05\x07\x09\x0b\x0d\x0f\x11\x13\x15\x16\x18\x1a\x1c\x1e\x1f\x21\x23\x25\x27\x28\x2a\x2c\x2d\x2f\x31\x32\x34\x36\x37\x39\x3b\x3c\x3e\x3f\x41\x43\x44\x46\x47\x49\x4b\x4c\x4e\x4f\x51\x52\x54\x55\x57\x58\x5a\x5b\x5d\x5e\x5f\x61\x62\x64\x65\x67\x68\x6a\x6b\x6c\x6e\x6f\x71\x72\x73\x75\x76\x77\x79\x7a\x7b\x7d\x7e\x7f\x81\x82\x83\x85\x86\x87\x89\x8a\x8b\x8d\x8e\x8f\x90\x92\x93\x94\x96\x97\x98\x99\x9b\x9c\x9d\x9e\x9f\xa1\xa2\xa3\xa4\xa6\xa7\xa8\xa9\xaa\xac\xad\xae\xaf\xb0\xb2\xb3\xb4\xb5\xb6\xb7\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff";
 
-    function sqrt_newton_lookup_8(uint256 x) internal pure returns (uint256) {
-        unchecked {
-            if (x <= 1) {
-                return x;
-            }
+    function sqrt_newton_lookup_8(uint256 x) internal pure returns (uint256 result) {
+        bytes memory lookup_table = lookup_table_8;
+        assembly ("memory-safe") {
+            // shift past the first 32 bytes (as these store the array length)
+            let data_ptr := add(lookup_table, 0x20)
 
-            // Here, result is a copy of x to compute the bit length
-            uint256 result = x;
-            // Here, e represents the bit length;
-            // its value is at most 256, so it could fit in a uint16.
-            uint256 e = 1;
-            if (x >= (1 << 128)) {
-                result >>= 128;
-                e = 129;
-            }
-            if (result >= (1 << 64)) {
-                result >>= 64;
-                e += 64;
-            }
-            if (result >= (1 << 32)) {
-                result >>= 32;
-                e += 32;
-            }
-            if (result >= (1 << 16)) {
-                result >>= 16;
-                e += 16;
-            }
-            if (result >= (1 << 8)) {
-                result >>= 8;
-                e += 8;
-            }
-            if (result >= (1 << 4)) {
-                result >>= 4;
-                e += 4;
-            }
-            if (result >= (1 << 2)) {
-                e += 2;
-            }
-            // e is currently bit length; we overwrite it to scale x
-            e = (256 - e) >> 1;
-            // m now satisfies 2**254 <= m < 2**256
-            uint256 m = x << (2 * e);
-            // result now stores the result
+            let e := clz(x)
+            e := shr(1, e)
+            let m := shl(shl(1, e), x)
 
-            // need to initialize result
-            result = 2**127 + (uint256(uint8(lookup_table_8[(m >> 248)])) << 119);
+            // the initial approximation
+            result := shr(248, m) // get the top 8 bits for lookup index
+            let word_ptr := add(data_ptr, result) // shift by lookup index
+            let word := mload(word_ptr) // grab 32-byte word
+            result := byte(0, word) // get lookup value (at index 0 now)
+            result := add(256, result) // add implicit high bit
+            result := shl(119, result) // shift
 
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result = (result + m / result) >> 1;
-            result >>= e;
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(1, add(result, div(m, result)))
+            result := shr(e, result)
 
-            if (result <= x/result) {
-                return result;
-            }
-            return result-1;
+            result := sub(result, gt(result, div(x, result)))
         }
     }
 
@@ -750,6 +469,133 @@ library SqrtStandard {
             if (result >= roundedResult) {
                 result = roundedResult;
             }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // ////SPDX-License-Identifier: MIT; see https://github.com/PaulRBerg/prb-math/blob/28055f6cd9a2367f9ad7ab6c8e01c9ac8e9acc61/LICENSE.md
+    /// @notice Calculates the square root of x using the Babylonian method.
+    ///
+    /// @dev See https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method.
+    ///
+    /// The implementation satisfies these properties:
+    ///
+    /// $$
+    /// \begin{cases}
+    ///   \lfloor\sqrt{x}\rfloor \leq \sqrt{x} < \lfloor\sqrt{x}\rfloor + 1 \\[0.5em]
+    ///   \lfloor\sqrt{x}\rfloor^2 \leq x < (\lfloor\sqrt{x}\rfloor + 1)^2
+    /// \end{cases}
+    /// $$
+    ///
+    /// Notes:
+    /// - If x is not a perfect square, the result is rounded down.
+    /// - Credits to OpenZeppelin for the explanations in comments below.
+    ///
+    /// @param x The uint256 number for which to calculate the square root.
+    /// @return result The result as a uint256.
+    /// @custom:smtchecker abstract-function-nondet
+    function sqrt_prb_v2(uint256 x) internal pure returns (uint256 result) {
+        // For our first guess, we calculate the biggest power of 2 which is smaller than the square root of x.
+        //
+        // We know that the "msb" (most significant bit) of x is a power of 2 such that we have:
+        //
+        // $$
+        // msb(x) <= x <= 2*msb(x)$
+        // $$
+        //
+        // We write $msb(x)$ as $2^k$, and we get:
+        //
+        // $$
+        // k = log_2(x)
+        // $$
+        //
+        // Thus, we can write the initial inequality as:
+        //
+        // $$
+        // 2^{log_2(x)} <= x <= 2*2^{log_2(x)+1} \\
+        // sqrt(2^k) <= sqrt(x) < sqrt(2^{k+1}) \\
+        // 2^{k/2} <= sqrt(x) < 2^{(k+1)/2} <= 2^{(k/2)+1}
+        // $$
+        //
+        // Consequently, $2^{log_2(x) /2} is a good first approximation of sqrt(x) with at least one correct bit.
+        unchecked {
+            // ideally, we should use arithmetic operators, but solc is not smart enough to optimize `2**(msb(x)/2)`
+            /// forge-lint: disable-next-line(incorrect-shift)
+            result = 1 << (msb_prb_v2(x) >> 1);
+        }
+
+        // At this point, `result` is an estimation with at least one bit of precision. We know the true value has at
+        // most 128 bits, since it is the square root of a uint256. Newton's method converges quadratically (precision
+        // doubles at every iteration). We thus need at most 7 iteration to turn our partial result with one bit of
+        // precision into the expected uint128 result.
+        assembly ("memory-safe") {
+            // note: division by zero in EVM returns zero
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+            result := shr(1, add(result, div(x, result)))
+
+            // If x is not a perfect square, round the result toward zero.
+            result := sub(result, gt(result, div(x, result)))
+        }
+    }
+
+    /// @notice Finds the zero-based index of the first 1 in the binary representation of x.
+    ///
+    /// @dev See the note on "msb" in this Wikipedia article: https://en.wikipedia.org/wiki/Find_first_set
+    ///
+    /// The implementation satisfies these properties:
+    ///
+    /// $$
+    /// \begin{cases}
+    ///   x = 0 \implies \text{msb}(x) = 0 \\
+    ///   x > 0 \implies x \gg \text{msb}(x) = 1
+    /// \end{cases}
+    /// $$
+    ///
+    /// Each step below is equivalent to this high-level code:
+    ///
+    /// ```solidity
+    /// if (x >= 2 ** 128) {
+    ///     x >>= 128;
+    ///     result += 128;
+    /// }
+    /// ```
+    ///
+    /// Where 128 is replaced with each respective power of two factor. The Yul instructions used below are:
+    ///
+    /// - "gt" is "greater than"
+    /// - "or" is the OR bitwise operator
+    /// - "shl" is "shift left"
+    /// - "shr" is "shift right"
+    ///
+    /// See the full high-level implementation here:
+    /// https://gist.github.com/PaulRBerg/f932f8693f2733e30c4d479e8e980948
+    ///
+    /// @param x The uint256 number for which to find the index of the most significant bit.
+    /// @return result The index of the most significant bit as a uint256.
+    /// @custom:smtchecker abstract-function-nondet
+    function msb_prb_v2(uint256 x) internal pure returns (uint256 result) {
+        assembly ("memory-safe") {
+            // 2^128
+            result := shl(7, lt(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF, x))
+            // 2^64
+            result := or(result, shl(6, lt(0xFFFFFFFFFFFFFFFF, shr(result, x))))
+            // 2^32
+            result := or(result, shl(5, lt(0xFFFFFFFF, shr(result, x))))
+            // 2^16
+            result := or(result, shl(4, lt(0xFFFF, shr(result, x))))
+            // 2^8
+            result := or(result, shl(3, lt(0xFF, shr(result, x))))
+            // 2^4
+            result := or(result, shl(2, lt(0xF, shr(result, x))))
+            // 2^2
+            result := or(result, shl(1, lt(0x3, shr(result, x))))
+            // 2^1
+            result := or(result, lt(0x1, shr(result, x)))
         }
     }
 

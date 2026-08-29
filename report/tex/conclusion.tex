@@ -2,14 +2,15 @@
 
 After comparing various algorithms for total gas cost,
 we found that the most efficient algorithm based on the sampled values is
-\UnrolledThree{} (Listing~\ref{list:newton-unrolled-3}).
+\UnrolledThree{} (Listing~\ref{list:newton-unrolled-3});
+it also has the second-lowest deployment cost.
 A proof of correctness may be found Appendix~\ref{app:proofs}.
 
 In Appendix~\ref{app_asymptotics:error_newton},
 we see that the different initializations change
-the required number of iterations but not asymptotically;
-that is, using Newton iteration still requires $O(\lg \lg n)$ iterations
-to compute the integer square root%
+the required number of iterations but not its asymptotic nature;
+that is, computing the integer square root
+using Newton iteration requires $O(\lg \lg n)$ iterations%
 \footnote{Thus, improved initializations give \emph{practical}
 but not \emph{theoretical} improvements.}.
 In Appendix~\ref{app:isqrt_with_float_sqrt},

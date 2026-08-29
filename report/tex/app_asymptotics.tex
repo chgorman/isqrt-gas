@@ -181,12 +181,11 @@ for the values of interest (\texttt{uint256}).
 
 Higher-order generalizations are possible,
 but we do not pursue them here.
-The fact that Halley's method is not competitive with Newton's method
-in the region of interest suggests
+That Halley's method is not competitive with Newton's method suggests
 that better \emph{practical} algorithms will not come from
 faster \emph{asymptotic} methods.
 Furthermore, we note that deriving Newton's method for square roots
 involves computing the first derivative of $f(t) = t^{2} - \alpha$
-while Halley's method requires computing the second derivative of $f(t)$.
+while Halley's method requires computing $f''(t)$.
 Given that $f^{(\ell)}(t) = 0$ for $\ell\ge3$,
 the author expects higher order methods will not converge faster than Halley.

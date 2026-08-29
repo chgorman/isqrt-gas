@@ -1,25 +1,26 @@
 \begin{table}[pt]
 \centering
-\begin{tabular}{|c|c|}
+\begin{tabular}{|c|S[table-format=8.0]|}
 \hline
 EVM Ops & Gas \\
 \hline
     $+,-$ & 3 \\
     $\times,\div$ & 5 \\
     \textsf{and}, \textsf{or}, \textsf{xor}, \textsf{not} & 3 \\
+    \textsf{clz} & 5 \\
     $<,>,=$ & 3 \\
     $\gg,\ll$ & 3 \\
 \hline
-    Transaction & $21\cdot10^{3}$ \\
-    \textsf{sstore} (clean) & $20\cdot10^{3}$ \\
-    \textsf{sstore} (dirty) &  $5\cdot10^{3}$ \\
-    Gas Target  & $15\cdot10^{6}$ \\
-    Gas Limit   & $30\cdot10^{6}$ \\
+    Transaction             &    21000 \\
+    \textsf{sstore} (clean) &    20000 \\
+    \textsf{sstore} (dirty) &     5000 \\
+    Gas Target              & 15000000 \\
+    Gas Limit               & 30000000 \\
 \hline
 \end{tabular}
 \caption[EVM Gas Costs]{Here are some
     of the gas costs for certain integer and bit operations within the
-    Ethereum Virtual Machine~\cite{BlockSizesGasLimits,EthereumYellowpaper}.
+    Ethereum Virtual Machine~\cite{BlockSizesGasLimits,EthereumYellowpaper,eip7939}.
     ``Transaction'' is the base gas cost of each transaction.
     ``\textsf{sstore} (clean)'' refers to writing a nonzero word
     (32 bytes) to the blockchain;

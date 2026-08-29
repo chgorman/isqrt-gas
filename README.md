@@ -103,26 +103,26 @@ with results stored in `data/extended_rnd/` and may be ran by
 These two tables show the summary statistics from the algorithms tested.
 These are Tables 2, 3, and 4 from the report.
 
-|          | UniswapV2 | PRB | OpenZeppelin | ABDK | OpenZeppelinV2 |
-| :------- | --------: | --: | -----------: | ---: | -------------: |
-|  Max     |  33931    | 874 |    1015      |  877 |       823      |
-|  Mean    |  17591    | 791 |     944      |  799 |       749      |
-|  Median  |  17497    | 794 |     943      |  799 |       751      |
-|  Std     |   9482    |  34 |      30      |   33 |        35      |
+|          | UniswapV2 | PRB | PRBv2 | OpenZeppelin | ABDK | OpenZeppelinV2 |
+| :------- | --------: | --: | ----: | -----------: | ---: | -------------: |
+|  Max     |  33931    | 874 |  474  |    1015      |  877 |       823      |
+|  Mean    |  17591    | 791 |  474  |     944      |  798 |       749      |
+|  Median  |  17497    | 794 |  474  |     943      |  799 |       751      |
+|  Std     |   9482    |  34 |    0  |      30      |   33 |        35      |
 
 |          | Unrolled1 | Unrolled2 | **Unrolled3** | While1 | While2 | While3 |
 | :------- | --------: | --------: | ------------: | -----: | -----: | -----: |
-|  Max     |    837    |    837    |    **790**    |  1200  |  1152  |  1130  |
-|  Mean    |    762    |    762    |    **730**    |   815  |   872  |   831  |
-|  Median  |    765    |    765    |    **730**    |   858  |   907  |   854  |
-|  Std     |     33    |     33    |     **28**    |   176  |   155  |   135  |
+|  Max     |    275    |    275    |    **269**    |   677  |   665  |   626  |
+|  Mean    |    275    |    275    |    **269**    |   448  |   551  |   459  |
+|  Median  |    275    |    275    |    **269**    |   482  |   535  |   496  |
+|  Std     |      0    |      0    |      **0**    |   119  |   102  |    85  |
 
 |          | BitLength | Linear | Hyper4 | Lookup4 | Lookup8 |
 | :------- | --------: | -----: | -----: | ------: | ------: |
-|  Max     |    833    |  796   |  826   |   903   |   906   |
-|  Mean    |    762    |  739   |  769   |   846   |   849   |
-|  Median  |    762    |  739   |  769   |   846   |   849   |
-|  Std     |     30    |   28   |   29   |    30   |    30   |
+|  Max     |    349    |  279   |  287   |   285   |   440   |
+|  Mean    |    344    |  279   |  287   |   285   |   440   |
+|  Median  |    339    |  279   |  287   |   285   |   440   |
+|  Std     |      5    |    0   |    0   |     0   |     0   |
 
 These results show how many times each algorithm was minimal.
 Algorithms not included were never minimal.
@@ -132,17 +132,10 @@ This is Table 5 from the report.
 | :----------------- |  -------:  |
 |    UniswapV2       |       2    |
 |    OpenZeppelinV2  |       2    |
-|    Unrolled1       |       2    |
-|    Unrolled2       |       2    |
-|  **Unrolled3**     |  **1188**  |
-|    While1          |     383    |
-|    While2          |     186    |
-|    While3          |     295    |
-|    BitLength       |       2    |
-|    Linear          |       2    |
-|    Hyper4          |       2    |
-|    Lookup4         |       2    |
-|    Lookup8         |       2    |
+|  **Unrolled3**     |  **1582**  |
+|    While1          |     282    |
+|    While2          |     134    |
+|    While3          |      46    |
 
 This is the most efficient algorithm (Unrolled3)
 for computing integer square roots;
@@ -152,70 +145,35 @@ See `report/` for more information.
 
 ```solidity
 // SPDX-License-Identifier: 0BSD
-function sqrt(uint256 x) internal pure returns (uint256) {
-    unchecked {
-        // Take care of easy edge cases
-        if (x <= 1) {
-            return x;
-        }
+function sqrt(uint256 x) internal pure returns (uint256 result) {
+    assembly ("memory-safe") {
+        result := clz(x)
+        result := sub(255, result)
+        // If
+        //
+        //      2**(k-1) <= x < 2**k
+        //
+        // we now have
+        //
+        //      result == k-1
 
-        // If we have
+        result := shr(1, shl(shr(1, result), 3))
+        // If
         //
-        //      2^{e-1} <= sqrt(x) < 2^{e},
+        //      2**(f-1) <= sqrt(x) < 2**f
         //
-        // then at the end of initialization, we will have
+        // we now have
         //
-        //      result == 2^{e-1} + 2^{e-2}.
-        //
-        // This ensures that
-        //
-        //      abs(sqrt(x) - result) <= 2^{e-2}.
-        uint256 result = x;
-        uint256 e = 1;
-        if (x >= (1 << 128)) {
-            result >>= 128;
-            e = 129;
-        }
-        if (result >= (1 << 64)) {
-            result >>= 64;
-            e += 64;
-        }
-        if (result >= (1 << 32)) {
-            result >>= 32;
-            e += 32;
-        }
-        if (result >= (1 << 16)) {
-            result >>= 16;
-            e += 16;
-        }
-        if (result >= (1 << 8)) {
-            result >>= 8;
-            e += 8;
-        }
-        if (result >= (1 << 4)) {
-            result >>= 4;
-            e += 4;
-        }
-        if (result >= (1 << 2)) {
-            e += 2;
-        }
-        result = (3 << (e/2)) >> 1;
+        //      result == 2**(f-1) + 2**(f-2)
 
-        // Perform the 6 required Newton iterations
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
 
-        // We either have
-        //
-        //      Isqrt(x) == result      or      Isqrt(x) == result-1.
-        if (result <= x/result) {
-            return result;
-        }
-        return result-1;
+        result := sub(result, gt(result, div(x, result)))
     }
 }
 ```

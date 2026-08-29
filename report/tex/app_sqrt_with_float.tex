@@ -269,7 +269,7 @@ This brings us to
         &\le 2^{\alpha-\beta+1} \nonumber\\
         &= \begin{cases}
             2^{e-25-\beta} &\quad f \mod 2 = 0 \\
-            2^{e-25.5-\beta} &\quad f \mod 2 = 0 \\
+            2^{e-25.5-\beta} &\quad f \mod 2 = 1 \\
         \end{cases}.
 \end{align}
 
@@ -279,7 +279,7 @@ Together this gives the desired result:
     \abs{\sqrt{n} - x} \le \begin{cases}
         2^{e-52.5} + 2^{e-25-\beta}   &\quad f \mod 2 = 0 \\
         2^{e-53}   + 2^{e-25.5-\beta} &\quad f \mod 2 = 1 \\
-    \end{cases}
+    \end{cases}.
 \end{equation}
 
 \noindent
@@ -347,11 +347,12 @@ It is important to note that the ``$+1$'' in the initialization value $x$
 does not affect the error bound for the second error term;
 the error bound remains unchanged even if it is removed%
 \footnote{\label{footnote:second-error-term}This
-would appear show that second error term
+would appear to show that the second error term
 (the accuracy of the computed square root)
-limits the initial accuracy to at most 52.5 bits
-and is the main reason why the author is not attempting further improvements.
-Even if it were possible to perform a weighted average
+limits the initial accuracy to at most 52.5 bits,
+and this is the main reason why the author is not attempting
+further improvements.
+Even if it were \emph{possible} to perform a weighted average
 of $\textsc{Sqrt}(q)$ and $\textsc{Sqrt}(q+1)$
 to obtain a better approximation,
 the author is not convinced the float-point error in the second term
@@ -360,11 +361,21 @@ With such a possible weighted value,
 the author could see how the first error term could be reduced
 to $2^{e-55}$, but the second term would remain at $2^{e-52.5}$;
 the overall error would then reduce to $2^{e-52.26}$,
-which is a negligible improvement.},
+which is a negligible improvement.
+The author is aware the difference between
+Algorithms~\ref{alg:isqrt_float_2} and~\ref{alg:isqrt_float_3}
+is negligible;
+Algorithm~\ref{alg:isqrt_float_3}
+was included only to show it is \emph{possible} to get 52
+bits of initial precision using one \texttt{double} square root
+(which has 53 bits).
+},
 but including it ensures that $x > \floor{\sqrt{n}}$.
 
-The author mentions that by the time a difference between
-Algorithms~\ref{alg:isqrt_float_2} and~\ref{alg:isqrt_float_3}
-is noticed the user should have long since switched
+The author mentions the additional work in
+Algorithm~\ref{alg:isqrt_float_3} will likely make it
+inferior to Algorithm~\ref{alg:isqrt_float_2} for practical values;
+he expects the advantage of Algorithm~\ref{alg:isqrt_float_3}
+will be noticed by the user only when he should have long since switched
 to more efficient algorithms from
 \texttt{GMP}~\cite{gmplib} or \texttt{Flint}~\cite{flint}.

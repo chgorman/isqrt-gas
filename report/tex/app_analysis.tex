@@ -21,28 +21,32 @@ are included in these tests.
 We test additional deterministic values.
 First, we include all deterministic values from Section~\ref{sec:comparison}.
 Additional values are of the form $2^{k} + 2^{j}$ for $j,k\in\N$ and $j < k$.
-The total number of values were 33154.
+The total number of values were \num{33154}.
 The results are shown in Table~\ref{table:minimal_gas_costs_ed}
 and Figure~\ref{fig:minimal_gas_hist_ed}.
 
-The minimal values have a different trend than before:
-\UnrolledThree{} and \WhileOne{} both perform well.
-The fact that \WhileOne{} performs the well in
-Table~\ref{table:minimal_gas_costs_ed}
-could be explained by noting that the initialization value in this test
-frequently starts \emph{very close} to the correct value;
-see the discussion on gas costs of \texttt{while} loops
+The minimal values have the same trend as before:
+\UnrolledThree{} performs well.
+In a previous version of this document
+(which compared algorithms which were not written in assembly),
+\UnrolledThree{} scored only slightly higher than \WhileOne{} in this test
+(because the \WhileOne{} initialization values
+were very close to the correct result);
+that is no longer the case.
+See the discussion on gas costs of \texttt{while} loops
 in Appendix~\ref{app_gas_costs:while}.
-It is interesting that \UnrolledThree{} performed
-as well as it did in this situation which favors \WhileOne{}.
 
-These results show it is easy to (unwittingly)
-test values which are biased toward one particular algorithm.
-This is the reason for testing a large collection
-of random values in Appendix~\ref{app:loguniform}.
-
+\begin{figure}[p]
+\begin{minipage}{\textwidth}
 \input{tables/minimal_gas_ed.tex}
+\end{minipage}
+
+\vspace{1cm}
+
+\begin{minipage}{\textwidth}
 \input{plots/minimal_hist_plots_ed.tex}
+\end{minipage}
+\end{figure}
 
 \subsection{Loguniform Tests}
 \label{app:loguniform}
@@ -50,7 +54,8 @@ of random values in Appendix~\ref{app:loguniform}.
 The tests in Section~\ref{sec:comparison} ran 1280 values
 which came from a loguniform distribution~\cite{ScipyLoguniform}.
 Here, we perform the same test using more samples;
-in particular, we use $16384 = 2^{14}$ random values from 16808 samples.
+in particular, we use $\num{16384} = 2^{14}$ random values
+from \num{16808} samples.
 The results are shown in Table~\ref{table:minimal_gas_costs_er}
 and Figure~\ref{fig:minimal_gas_hist_er}.
 In this case, \UnrolledThree{} performs well.
@@ -60,8 +65,17 @@ Tables~\ref{table:minimal_gas_costs} and \ref{table:minimal_gas_costs_er}
 or Figures~\ref{fig:minimal_gas_hist} and \ref{fig:minimal_gas_hist_er}.
 \UnrolledThree{} has a majority of the minimal cost for random values.
 
+\begin{figure}[p]
+\begin{minipage}{\textwidth}
 \input{tables/minimal_gas_er.tex}
+\end{minipage}
+
+\vspace{1cm}
+
+\begin{minipage}{\textwidth}
 \input{plots/minimal_hist_plots_er.tex}
+\end{minipage}
+\end{figure}
 
 \subsection{Conclusion}
 

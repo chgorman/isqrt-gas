@@ -1,31 +1,34 @@
 // SPDX-License-Identifier: 0BSD
-function sqrt(uint256 x) internal pure returns (uint256) {
-    unchecked {
-        if (x <= 1) { return x; }
+function sqrt(uint256 x) internal pure returns (uint256 result) {
+    assembly ("memory-safe") {
+        result := clz(x)
+        result := sub(257, result)
+        // If
+        //
+        //      2**(k-1) <= x < 2**k
+        //
+        // we now have
+        //
+        //      result == k-1
 
-        uint256 xAux = x;
+        result := shl(shr(1, result), 1)
+        // If
+        //
+        //      2**(f-1) <= sqrt(x) < 2**f
+        //
+        // we now have
+        //
+        //      result == 2**f
 
-        uint256 result = 2;
+        // Perform the 7 required newton iterations
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
+        result := shr(1, add(result, div(x, result)))
 
-        if (xAux >= (1 << 128)) { xAux >>= 128; result = 2 << 64; }
-        if (xAux >= (1 <<  64)) { xAux >>=  64; result <<= 32; }
-        if (xAux >= (1 <<  32)) { xAux >>=  32; result <<= 16; }
-        if (xAux >= (1 <<  16)) { xAux >>=  16; result <<=  8; }
-        if (xAux >= (1 <<   8)) { xAux >>=   8; result <<=  4; }
-        if (xAux >= (1 <<   4)) { xAux >>=   4; result <<=  2; }
-        if (xAux >= (1 <<   2)) {               result <<=  1; }
-
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-        result = (result + x / result) >> 1;
-
-        if (result <= x/result) {
-            return result;
-        }
-        return result-1;
+        result := sub(result, gt(result, div(x, result)))
     }
 }

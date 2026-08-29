@@ -1,12 +1,12 @@
 \section{Proofs}
 \label{app:proofs}
 
-Here we include proofs for the algorithms.
+Here we include proofs for the new algorithms.
 This includes some of the material from~\cite[Appendix B]{EfficientIsqrt}.
 A notable omission is the proof of
 \python{} (Listing~\ref{list:python-isqrt});
-this is due to the fact that the emphasis here is on algorithms
-based on Newton iteration.
+this is due to the fact that the emphasis here is on
+Newton-based algorithms.
 A proof of correctness for \python{}
 may be found in~\cite[Appendix C]{EfficientIsqrt}.
 Some of the work here is similar to that found
@@ -48,8 +48,7 @@ defined by
 
 \noindent
 Each application of $f_{\alpha}(\cdot)$ is called a \emph{Newton iteration}.
-This sequence converges to $\sqrt{\alpha}$:
-$\lim_{k\to\infty} t_{k} = \sqrt{\alpha}$.
+This sequence converges to $\sqrt{\alpha}$.
 
 In order to see how the error changes with each iteration,
 we set
@@ -101,6 +100,145 @@ We define
 This represents the integer version of $f_{\alpha}$.
 
 
+\subsection{Initializations}
+\label{app:initializations}
+
+Throughout we assume
+
+\begin{equation}
+    2^{f-1} \le n < 2^{f}, \quad n\ne0.
+\end{equation}
+
+\noindent
+Every algorithm has been verified to return the correct result
+when $n=0$.
+
+\subsubsection{\UnrolledOne{} and \WhileOne{}}
+\label{app:initializations:unrolled1}
+
+We know
+
+\begin{align}
+    t &= 255 - \textsf{clz}(n) \nonumber\\
+        &= f-1.
+\end{align}
+
+\noindent
+We see
+
+\begin{equation}
+    r = 2^{\floor{t/2}} = 2^{e-1}.
+\end{equation}
+
+\noindent
+when $f = 2e-k$, $k\in\braces{0,1}$.
+
+\subsubsection{\UnrolledTwo{} and \WhileTwo{}}
+\label{app:initializations:unrolled2}
+
+We know
+
+\begin{align}
+    t &= 257 - \textsf{clz}(n) \nonumber\\
+        &= f+1.
+\end{align}
+
+\noindent
+We see
+
+\begin{equation}
+    r = 2^{\floor{t/2}} = 2^{e}.
+\end{equation}
+
+\noindent
+when $f = 2e-k$, $k\in\braces{0,1}$.
+
+\subsubsection{\UnrolledThree{} and \WhileThree{}}
+\label{app:initializations:unrolled3}
+
+We know
+
+\begin{align}
+    t &= 255 - \textsf{clz}(n) \nonumber\\
+        &= f-1.
+\end{align}
+
+\noindent
+We see
+
+\begin{equation}
+    r = \floor{\frac{3\cdot2^{\floor{t/2}}}{2}} = 2^{e-1} + 2^{e-2}
+\end{equation}
+
+\noindent
+when $f = 2e-k$, $k\in\braces{0,1}$ for $e\ge2$.
+When $e=1$, we see
+
+\begin{equation}
+    r = \floor{\frac{3}{2}} = 1.
+\end{equation}
+
+\subsubsection{\BitLength{}}
+\label{app:initializations:bitlength}
+
+We know
+
+\begin{align}
+    t &= 255 - \textsf{clz}(n) \nonumber\\
+        &= f-1.
+\end{align}
+
+\noindent
+Thus, the initialization gives the bitlength minus one.
+
+\subsubsection{\Linear{}, \HyperFour{}, \LookupFour{}, and \LookupEight{}}
+\label{app:initializations:linear}
+
+We know
+
+\begin{equation}
+    t = \textsf{clz}(n)
+\end{equation}
+
+\noindent
+and so $t + f = 256$.
+We suppose $t = 2\ell + j$ for $j\in\braces{0,1}$.
+If $s = \floor{t/2}$, then we let
+
+\begin{equation}
+    m \mathDef{} 2^{2s}n.
+\end{equation}
+
+We see
+
+\begin{align}
+    m &= 2^{2s}n \nonumber\\
+      &< 2^{2\ell + f} \nonumber\\
+      &\le 2^{256}.
+\end{align}
+
+\noindent
+We also have
+
+\begin{align}
+    m &= 2^{2s}n \nonumber\\
+      &\ge 2^{2\ell + f-1} \nonumber\\
+      &\ge 2^{254}.
+\end{align}
+
+\noindent
+Together, these imply
+
+\begin{equation}
+    2^{254} \le m < 2^{256},
+\end{equation}
+
+\noindent
+as desired.
+This scaling allows for the specific algorithms to properly
+handle the error bound computations below.
+
+
 \subsection{Error Bounds}
 
 Based on the above work, we will now compute the error bounds
@@ -110,6 +248,7 @@ and we primarily focus on the initial error and the first Newton iteration,
 as these are most important.
 Only when care is required to prove the desired
 error bounds do we go into greater detail.
+Throughout we assume $n\ge1$.
 
 Throughout this section, we are assuming that $\sqrt{n}$ is an $e$-bit number:
 
@@ -156,7 +295,8 @@ At the same time, we note that when $\eps_{k}\le1$,
 \end{equation}
 
 \noindent
-This follows because $x_{k}\in\N$ and $\abs{\sqrt{n} - \floor{\sqrt{n}}} < 1$.
+This follows because $x_{k}\in\N$, $x_{k}\ge q$,
+and $\abs{\sqrt{n} - \floor{\sqrt{n}}} \le 1$.
 Thus, we focus on determining when $\eps_{k}\le1$.
 Any attempt to get a smaller error bound
 is pointless because it is less expensive to check
@@ -212,7 +352,7 @@ greater than to $\sqrt{n}$:
 \end{equation}
 
 \noindent
-Note that strict inequality: we have $x_{0} > \sqrt{n}$.
+Note the strict inequality: we have $x_{0} > \sqrt{n}$.
 We have the error bound
 
 \begin{equation}
@@ -312,7 +452,7 @@ In this case, we have
 whence it follows that
 
 \begin{equation}
-    \sqrt{2}\cdot2^{e-1} \le \sqrt{n} < 2^{e},
+    \sqrt{2}\cdot2^{e-1} \le \sqrt{n} < 2^{e}.
 \end{equation}
 
 \noindent
@@ -356,7 +496,7 @@ In this case, we have
 whence it follows that
 
 \begin{equation}
-    \cdot2^{e-1} \le \sqrt{n} < \sqrt{2}\cdot2^{e-1},
+    \cdot2^{e-1} \le \sqrt{n} < \sqrt{2}\cdot2^{e-1}.
 \end{equation}
 
 \noindent
@@ -444,7 +584,7 @@ In particular, we computed values $\nu_{v,0}, \nu_{v,1}\in\N$ with
 
 \begin{align}
     \frac{\nu_{v,0}}{16} &\le \sqrt{v} \nonumber\\
-    \frac{\nu_{v,1}}{16} &\ge \sqrt{v+1}
+    \frac{\nu_{v,1}}{16} &\ge \sqrt{v+1}.
     \label{eq:app_linear_v_bound}
 \end{align}
 
@@ -553,7 +693,7 @@ The analysis is the same; the difference is the initialization value.
 We start by scaling $n$ (relabeled as $m$) so that
 
 \begin{equation}
-    2^{2e-2} \le m < 2^{2e}.
+    2^{2e-2} \le m < 2^{2e}
 \end{equation}
 
 \noindent
@@ -586,7 +726,7 @@ In particular, we computed values $\nu_{v,0}, \nu_{v,1}\in\N$ with
 
 \begin{align}
     \frac{\nu_{v,0}}{16} &\le \sqrt{v} \nonumber\\
-    \frac{\nu_{v,1}}{16} &\ge \sqrt{v+1}
+    \frac{\nu_{v,1}}{16} &\ge \sqrt{v+1}.
     \label{eq:app_hyper4_v_bound}
 \end{align}
 
@@ -693,7 +833,7 @@ The important fact is that, in all cases, $\eps_{5}\le 2^{e-128}$.
 We start by scaling $n$ (relabeled as $m$) so that
 
 \begin{equation}
-    2^{2e-2} \le m < 2^{2e}.
+    2^{2e-2} \le m < 2^{2e}
 \end{equation}
 
 \noindent
@@ -782,12 +922,12 @@ This gives the error bounds
 We start by scaling $n$ (relabeled as $m$) so that
 
 \begin{equation}
-    2^{2e-2} \le m < 2^{2e}.
+    2^{2e-2} \le m < 2^{2e}
 \end{equation}
 
 \noindent
-We then set
 for $e = 128$.
+We then set
 
 \begin{equation}
     v \mathDef{} \floor{\frac{m}{2^{2e-8}}}
@@ -966,7 +1106,7 @@ thus, in some of the newly developed algorithms,
 the case $n\ge(2^{128}-1)^{2}$ is handled separately with an \texttt{if}
 statement at the beginning.
 We may also check $r\le \floor{n/r}$,
-which will not overflow.
+which will not overflow (and thus is preferred).
 
 \subsubsection{Return Minimum}
 We note that in some of the algorithms found online
@@ -982,10 +1122,30 @@ the final check is of the form
 \noindent
 This is done after applying 7 Newton iterations.
 
-It is not clear that this logic ensures the correct value is returned.
+It is not clear that this logic ensures the correct value is returned%
+\footnote{It is also unclear to the author why this was determined
+to be valid return logic.
+We note~\cite[Figure 11-1, Integer square root,
+Newton's method]{HackersDelight} is essentially \WhileTwo{}
+(although the initialization is modified so $\sqrt{x} \le g_{0} = 2^{s}$
+with $s$ minimal), so there is no concern about the return logic;
+the same holds for the algorithms discussed
+in~\cite[Algorithm 1.7.1]{cohen1993},
+\cite[Algorithm 9.2.11]{PrimeNumbersACP2005},
+and \cite[Algorithm 1.13]{ModernComputerArithmetic051}.
+
+In looking at~\cite[Listing 2]{PythonIsqrt},
+the return logic is equivalent to ``\texttt{if a <= (n // a); return a}''.
+It could be the case that returning $\min\parens{r, \floor{n/r}}$
+was chosen as an attempt to convert the loop
+to a fixed iteration;
+this is only the author's guess.
+}.
 These algorithms have the same initialization
 as in \UnrolledOne{} and perform 7 Newton iterations, so we know
 $r\in\braces{q, q+1}$.
+It is \emph{possible} to have $r=q+1$ after 7 Newton iterations;
+this happens for $n=2^{256}-1$.
 
 Suppose we have
 
@@ -1012,14 +1172,14 @@ so that
 This shows that if $n$ is as specified and we have $r=q+1$
 after the final Newton iteration (which is possible with the current analysis),
 then $\min(r, \floor{n/r}) = \floor{n/r} = q-1$, which is incorrect.
-Thus, the current analysis will not ensure that this return logic
-will always give the correct result.
+Thus, the current analysis will not ensure this return logic
+gives the correct result.
 
 We note that although we have shown that it is \emph{possible} for
 \prb{}, \OpenZeppelin{}, and \abdk{}
 to return incorrect results (that is, results which are off by 1),
 we must mention that there is no known value where this error occurs.
-That is to say, the current analysis is \emph{unable to prove
+That is to say: the current analysis is \emph{unable to prove
 the algorithms are correct},
 but that is not the same as \emph{proving they are incorrect}.
 With that said, these algorithms operate on \texttt{uint256}
@@ -1121,73 +1281,53 @@ We note that the result will oscillate as $q, q+1, q, q+1, \dots$.
 
 \subsubsection{\UnrolledOne{}}
 
-From the error bounds in Appendix~\ref{app:error_bounds:unrolled1},
+From the initialization in Appendix~\ref{app:initializations:unrolled1}
+and the error bounds in Appendix~\ref{app:error_bounds:unrolled1},
 we see that $\eps_{7}\le1$ (we require 7 Newton iterations).
 Thus, $r\in\braces{q,q+1}$, and the return logic
 discussed in Appendix~\ref{app:return_logic} ensures the correct result.
 
 \subsubsection{\UnrolledTwo{}}
 
-From the error bounds in Appendix~\ref{app:error_bounds:unrolled2},
+From the initialization in Appendix~\ref{app:initializations:unrolled2}
+and the error bounds in Appendix~\ref{app:error_bounds:unrolled2},
 we see that $\eps_{7}\le1$ (we require 7 Newton iterations).
 Thus, $r\in\braces{q,q+1}$, and the return logic
 discussed in Appendix~\ref{app:return_logic} ensures the correct result.
 
 \subsubsection{\UnrolledThree{}}
 
-From the error bounds in Appendix~\ref{app:error_bounds:unrolled3},
+From the initialization in Appendix~\ref{app:initializations:unrolled3}
+and the error bounds in Appendix~\ref{app:error_bounds:unrolled3},
 we see that $\eps_{6}\le1$ (we require 6 Newton iterations).
 Thus, $r\in\braces{q,q+1}$, and the return logic
 discussed in Appendix~\ref{app:return_logic} ensures the correct result.
 
 \subsubsection{\WhileOne{}}
 
-After the first Newton iteration, we have $r\ge q$;
+From the initialization in Appendix~\ref{app:initializations:unrolled1},
+we have $r\ge q$ after the first Newton iteration;
 the proof in Appendix~\ref{proof:general_newton} then applies.
-The first Newton iteration \emph{is required} for this proof to be valid.
+The first Newton iteration is \emph{required}.
 
 \subsubsection{\WhileTwo{}}
 
-The proof in Appendix~\ref{proof:general_newton} applies
+We use the initialization in Appendix~\ref{app:initializations:unrolled2};
+the proof in Appendix~\ref{proof:general_newton} applies
 because $r > \sqrt{n}$.
 
 \subsubsection{\WhileThree{}}
 
-After the first Newton iteration, we have $r\ge q$;
+From the initialization in Appendix~\ref{app:initializations:unrolled3},
+we have $r\ge q$ after the first Newton iteration;
 the proof in Appendix~\ref{proof:general_newton} then applies.
-The first Newton iteration \emph{is required} for this proof to be valid.
+The first Newton iteration is \emph{required}.
 
 \subsubsection{\BitLength{}}
 \label{app:conv_proof:bitlength}
 
-We let $k\in\N$ and suppose we have
-
-\begin{equation}
-    2^{2k-2} \le n < 2^{2k}
-\end{equation}
-
-\noindent
-After the \texttt{if (result >= (1 << 2))} statement,
-we will have $e = 2k-1$.
-
-If the statement \texttt{if (result >= (1 << 1))} is \textsf{True},
-then this means that we actually have the bitlength is equal to $2k$.
-We have
-
-\begin{equation}
-    r = 27\cdot 2^{k-5}.
-\end{equation}
-
-\noindent
-Otherwise, \texttt{if (result >= (1 << 1))} is \textsf{False}
-and we have the bitlength is equal to $2k-1$,
-We have
-
-\begin{equation}
-    r = 39\cdot 2^{k-6}.
-\end{equation}
-
-From the error bounds in Appendix~\ref{app:error_bounds:bitlength},
+From the initialization in Appendix~\ref{app:initializations:bitlength}
+and the error bounds in Appendix~\ref{app:error_bounds:bitlength},
 we see that $\eps_{6}\le1$ (we require 6 Newton iterations).
 Thus, $r\in\braces{q,q+1}$, and the return logic
 discussed in Appendix~\ref{app:return_logic} ensures the correct result.
@@ -1196,65 +1336,8 @@ discussed in Appendix~\ref{app:return_logic} ensures the correct result.
 \label{app:conv_proof:linear}
 
 \paragraph{Initial Scaling}
-We show that we properly scale $n$ so that $2^{254}\le m < 2^{256}$.
-
-We let $k\in\N$ such that
-
-\begin{equation}
-    2^{2k-2} \le n < 2^{2k}.
-    \label{eq:conv_proof:linear:initial_scale}
-\end{equation}
-
-\noindent
-In this case, we see that the ``bitlength'' $b$ is
-
-\begin{equation}
-    b \mathDef{} 2k-1.
-\end{equation}
-
-\noindent
-The ``bitlength'' $b$ is the scaling factor $e$ before it is overwritten.
-From here, we compute the scaling factor
-
-\begin{equation}
-    e \mathDef{} 128 - k.
-\end{equation}
-
-\noindent
-We define
-
-\begin{equation}
-    m \mathDef{} n \cdot 2^{2e}.
-\end{equation}
-
-\noindent
-From Eq.~\eqref{eq:conv_proof:linear:initial_scale},
-we see
-
-\begin{align}
-    m &= 2^{2e}n \nonumber\\
-        &\ge 2^{256 - 2k} \cdot 2^{2k-2} \nonumber\\
-        &= 2^{254}
-\end{align}
-
-\noindent
-and
-
-\begin{align}
-    m &= 2^{2e}n \nonumber\\
-        &< 2^{256 - 2k} \cdot 2^{2k} \nonumber\\
-        &= 2^{256}.
-\end{align}
-
-\noindent
-Together, these imply
-
-\begin{equation}
-    2^{254} \le m < 2^{256},
-\end{equation}
-
-\noindent
-as desired.
+Appendix~\ref{app:initializations:linear}
+shows that we properly scale $n$ so that $2^{254}\le m < 2^{256}$.
 
 \paragraph{Error Bounds}
 From the error bounds in Appendix~\ref{app:error_bounds:linear},

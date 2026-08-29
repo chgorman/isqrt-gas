@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: 0BSD
-function sqrt(uint256 x) internal pure returns (uint256) {
-    unchecked {
-        if (x == 0) { return 0; }
+function sqrt(uint256 x) internal pure returns (uint256 left) {
+   unchecked {
+        if (x == 0) {
+            return 0;
+        }
         if (x < 16) {
             if (x < 4) {
                 return 1;
@@ -11,28 +13,27 @@ function sqrt(uint256 x) internal pure returns (uint256) {
                 return 3;
             }
         }
+        assembly ("memory-safe") {
+            left := clz(x)
+            left := sub(255, left)
+            left := shl(shr(1, left), 1)
+            let right := shl(1, left)
 
-        uint256 xAux = x;
-        uint256 left = 1;
-        if (xAux >= (1 << 128)) { xAux >>= 128; left = 1 << 64; }
-        if (xAux >= (1 <<  64)) { xAux >>=  64; left <<= 32; }
-        if (xAux >= (1 <<  32)) { xAux >>=  32; left <<= 16; }
-        if (xAux >= (1 <<  16)) { xAux >>=  16; left <<=  8; }
-        if (xAux >= (1 <<   8)) { xAux >>=   8; left <<=  4; }
-        if (xAux >= (1 <<   4)) { xAux >>=   4; left <<=  2; }
-        if (xAux >= (1 <<   2)) {               left <<=  1; }
+            for { } and(iszero(gt(left, div(x, left))),
+                        lt(div(x, right), right)) { } {
+                let interp := add(left,
+                                  div(sub(x, mul(left, left)),
+                                      add(right, left)))
 
-        uint256 right = (left << 1);
-        uint256 interp;
-
-        while ((left <= x/left) && (x/right < right)) {
-            interp = left + (x - left**2)/(right + left);
-            if (x/interp < interp) {
-                right = interp;
-            } else {
-                left = interp + 1;
+                switch lt(div(x, interp), interp)
+                case 1 {
+                    right := interp
+                }
+                default {
+                    left := add(interp, 1)
+                }
             }
+            left := sub(left, 1)
         }
-        return left-1;
     }
 }

@@ -6,7 +6,7 @@ The algorithm design philosophy is straightforward:
 provably correct algorithms which are efficient within the
 Ethereum Virtual Machine.
 The primary focus is on minimizing the per-call gas cost,
-but we also want to ensure low deployment cost as well.
+but we want a low deployment cost as well.
 
 \subsection{Specific Algorithms in Solidity}
 
@@ -15,6 +15,7 @@ but we also want to ensure low deployment cost as well.
 The specific \textsc{Isqrt} algorithms we found online were
 \Uniswap{} (Listing~\ref{list:uni-newton})~\cite{uniswap-v2},
 \prb{} (Listing~\ref{list:prb-newton})~\cite{prb-math},
+\prbTwo{} (Listing~\ref{list:prb-v2-newton})~\cite{prb-math-v2},
 \OpenZeppelin{} (Listing~\ref{list:oz-newton})~\cite{open-zeppelin},
 \abdk{} (Listing~\ref{list:abdk-newton})~\cite{abdk-consulting}, and
 \OpenZeppelinTwo{} (Listing~\ref{list:oz-v2-newton})~\cite{open-zeppelin-v2}.
@@ -24,20 +25,25 @@ and ``unchecked'' portions.
 The \OpenZeppelin{} algorithm is mathematically equivalent
 to \prb{} and \abdk{}.
 \OpenZeppelinTwo{} was developed with input from the author,
-although in the end his contribution was only the choice
-of initialization value which lead to only needing six Newton iterations;
+although in the end his contribution was merely
+the initialization value that led to needing only six Newton iterations;
 the author did not write any of the code
 or comments~\cite{OpenZeppelinIsqrtCommit}.
+\prbTwo{} was developed later and uses Solidity assembly language Yul%
+~\cite{YulLanguage}%
+\footnote{At the time of this writing the code has not been merged in,
+but the code led the author of the present work to
+rewrite the algorithms in assembly.}.
 
 None of these algorithms reference a proof of correctness
-with the exception of \OpenZeppelinTwo{}
+except \OpenZeppelinTwo{}
 (which was developed after the initial version of the present work).
 We note that \Uniswap{}
 is provably correct as it essentially
 implements~\cite[Algorithm 1.7.1]{cohen1993};
 compare Listing~\ref{list:uni-newton} and Algorithm~\ref{alg:cohen_isqrt}.
 Unfortunately, \Uniswap{} does not follow the comment
-in~\cite[Chapter 1.7, Remarks]{cohen1993} which states that
+in~\cite[Chapter 1.7, Remarks]{cohen1993} that states that
 ``[w]hen actually implementing this algorithm,
 the initialization step must be modified''.
 \OpenZeppelin{}~\cite{open-zeppelin}
@@ -45,9 +51,12 @@ says that we ``need at most 7 iteration[s]''
 while  \abdk{}~\cite{abdk-consulting} states that
 ``[s]even iterations should be enough'';
 \prb{}~\cite{prb-math} has similar language.
+It must be noted that~\prbTwo{} is mathematically equivalent
+to \UnrolledOne{} and so is provably correct.
 
 \input{code/uni-newton.tex}
 \input{code/prb-newton.tex}
+\input{code/prb-newton_v2.tex}
 \input{code/oz-newton.tex}
 \input{code/abdk-newton.tex}
 \input{code/oz-newton_v2.tex}
@@ -58,6 +67,40 @@ Due to requiring \emph{provably correct}
 methods for computing integer square roots,
 additional algorithms were written.
 All proofs are relegated to Appendix~\ref{app:proofs}.
+All of the algorithms discussed here have been written in
+Yul~\cite{YulLanguage} for efficiency.
+One important feature is the use of the \textsf{clz} function
+for \emph{count leading zeros};
+this was added in Ethereum Improvement Proposal 7939
+(EIP-7939)~\cite{eip7939}.
+Using \textsf{clz} allows for significant efficiency gains:
+the new opcode costs 5 gas while the most efficient implementation
+of the function is estimated to cost 184 gas~\cite[Specification]{eip7939}.
+
+One important application of \textsf{clz} is to compute the bitlength%
+\footnote{Thus, we expect initializations which compute the bit length
+\emph{without} using \textsf{clz} will cost at least 184 gas.}
+via
+
+\begin{equation}
+    \textsf{bitlength}(x) = 256 - \textsf{clz}(x), \quad x\ne 0.
+    \label{eq:bitlength_def}
+\end{equation}
+
+\noindent
+The case $x=0$ must be handled separately,
+but this is mainly because for $x>0$ and $\textsf{bitlength}(x) = k$
+we have
+
+\begin{equation}
+    2^{k-1} \le x < 2^{k}.
+    \label{eq:bitlength_bit_inequality}
+\end{equation}
+
+\noindent
+Therefore, while Eq.~\eqref{eq:bitlength_def} gives $\textsf{bitlength}(0) = 0$,
+this does not result in an inequality similar to
+Eq.~\eqref{eq:bitlength_bit_inequality}.
 
 The first algorithms come in two groups of 3.
 They are
@@ -70,14 +113,14 @@ They are
 A version of \UnrolledThree{} was previously presented
 in~\cite{EfficientIsqrt};
 the \emph{initialization value} is the same but
-the \emph{initialization method} has been changed.
+the \emph{initialization method} has been updated.
 Here, \unrolled{} refers to the fact that a fixed number of Newton iterations
 are performed;
 \while{} refers to the fact that the Newton iterations are iterated
 within a \texttt{while} loop.
 Labels \texttt{1}, \texttt{2}, and \texttt{3}
 refer to the different initialization values:
-the largest power-of-two less than or equal to integer square root value;
+the largest power-of-two less than or equal to the integer square root value;
 the smallest power-of-two greater than the integer square root value;
 the arithmetic mean of the two previous values.
 
@@ -115,6 +158,14 @@ computing square roots
 \input{code/newton_lookup_4.tex}
 \input{code/newton_lookup_8.tex}
 
+\subsubsection{Handling $x=0$ within the New Algorithms}
+
+The \textsf{bitlength} function in Eq.~\eqref{eq:bitlength_def}
+is modified in the new algorithms for efficiency purposes.
+Even so, the modifications have been proven correct
+in Appendix~\ref{app:initializations}.
+
+
 \subsection{General Algorithm Discussion}
 
 When using Newton iterations,
@@ -122,6 +173,7 @@ a good initial approximation is critical to ensure a low overall cost.
 The following algorithms use the largest power-of-two less than or equal
 to the integer square root:
 \prb{} (Listing~\ref{list:prb-newton}),
+\prbTwo{} (Listing~\ref{list:prb-v2-newton}),
 \OpenZeppelin{} (Listing~\ref{list:oz-newton}),
 \abdk{} (Listing~\ref{list:abdk-newton}),
 \UnrolledOne{} (Listing~\ref{list:newton-unrolled-1}), and

@@ -5,24 +5,24 @@
     |S[table-format=6.0]|S[table-format=6.0]
     |S[table-format=6.0]|S[table-format=6.0]|}
 \hline
-    & \UnrolledOne{} & \UnrolledTwo{} &
-    \cellcolor{yellow!25} \UnrolledThree{} &
+    & \cellcolor{yellow!25} \UnrolledOne{} & \cellcolor{yellow!25} \UnrolledTwo{} &
+    \cellcolor{yellow!40} \UnrolledThree{} &
     \WhileOne{} & \WhileTwo{} & \WhileThree{} \\
 \hline
-Max      &    837 &    837 & \cellcolor{yellow!25}    790 &                         1200 &                         1152 &                         1130 \\
-Mean     &    762 &    762 & \cellcolor{yellow!25}    730 &                          815 &                          872 &                          831 \\
-Median   &    765 &    765 & \cellcolor{yellow!25}    730 &                          858 &                          907 &                          854 \\
-Std      &     33 &     33 & \cellcolor{yellow!25}     28 &                          176 &                          155 &                          135 \\
+Max      & \cellcolor{yellow!25}    275 & \cellcolor{yellow!25}    275 & \cellcolor{yellow!40}    269 &                          677 &                          657 &                          626 \\
+Mean     & \cellcolor{yellow!25}    275 & \cellcolor{yellow!25}    275 & \cellcolor{yellow!40}    269 &                          448 &                          503 &                          459 \\
+Median   & \cellcolor{yellow!25}    275 & \cellcolor{yellow!25}    275 & \cellcolor{yellow!40}    269 &                          482 &                          527 &                          496 \\
+Std      & \cellcolor{yellow!25}      0 & \cellcolor{yellow!25}      0 & \cellcolor{yellow!40}      0 &                          119 &                          102 &                           85 \\
 \hline
-Abs Cost & 283589 & 283601 & \cellcolor{yellow!15} 276117 & \cellcolor{yellow!15} 252678 & \cellcolor{yellow!15} 247488 & \cellcolor{yellow!15} 254192 \\
-Rel Cost & 101438 & 101450 & \cellcolor{yellow!15}  93966 & \cellcolor{yellow!15}  70527 & \cellcolor{yellow!15}  65337 & \cellcolor{yellow!15}  72041 \\
+Abs Cost & \cellcolor{yellow!10} 194259 & \cellcolor{yellow!10} 194475 & \cellcolor{yellow!10} 194043 & \cellcolor{yellow!10} 195075 & \cellcolor{yellow!10} 193995 & \cellcolor{yellow!10} 196155 \\
+Rel Cost & \cellcolor{yellow!10}  14284 & \cellcolor{yellow!10}  14500 & \cellcolor{yellow!10}  14068 & \cellcolor{yellow!10}  15100 & \cellcolor{yellow!10}  14020 & \cellcolor{yellow!10}  16180 \\
 \hline
 \end{tabular}
 \caption[Gas Costs Statistics 2]{Here are statistics
     related to the gas cost data;
     we also include the absolute deployment gas cost and
     relative deployment gas cost
-    (absolute gas cost less 182151 gas,
+    (absolute gas cost less \num{179975} gas,
     the deployment cost of an empty smart contract).
     All of these algorithms are provably correct.
     These results are for the tests in Section~\ref{sec:comparison}.
